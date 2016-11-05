@@ -28,6 +28,7 @@ I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.c
   * Support for graphical protocols (RDP, VNC, X11) monitoring
   * User productivity dashboard 
   
+  
 ### See it in action
 [![Aker - in action](https://i1.ytimg.com/vi/O-boM3LbVT4/hqdefault.jpg)](https://www.youtube.com/watch?v=O-boM3LbVT4)
 
