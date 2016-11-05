@@ -85,4 +85,4 @@ chsh -s /bin/aker/aker.py username
 ```
 
 ### Contributing
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
+Currently I work on the code in my free time, any assitance is highly appreciated. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
