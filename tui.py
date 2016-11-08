@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-#       Copyright 2016 KrE80r
+#       Copyright 2016 Ahmed Nazmy
 #
 
 # Meta
 __license__ = "AGPLv3"
-__author__ = 'KrE80r <KrE80r@gmail.com>'
+__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 #
-#       Copyright 2016 KrE80r
+#       Copyright 2016 Ahmed Nazmy
 #
 
 # Meta
 __license__ = "AGPLv3"
-__author__ = 'KrE80r <ahmed@nazmy.io>'
+__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 import logging
 import paramiko
