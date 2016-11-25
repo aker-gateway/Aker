@@ -3,7 +3,7 @@
 
 
 ### What is Aker?
-Aker is a security tool that helps you configure your own Linux ssh jump/bastion host. Named after an Egyptian mythology deity who guarded the borders, Aker would act as choke point through which all your sysadmins and support staff access Linux production servers. Aker SSH gateway includes a lot of security features that would help you manage and administer thousands of Linux servers at ease. For detailed look check [the wiki](https://github.com/aker-gateway/Aker/wiki)  
+Aker is a security tool that helps you configure your own Linux ssh jump/bastion host. Named after an Egyptian mythology deity who guarded the borders, Aker would act as choke point through which all your sysadmins and support staff access Linux production servers. Aker SSH gateway includes a lot of security features that would help you manage and administer thousands of Linux servers at ease. For a detailed look check our [Wiki](https://github.com/aker-gateway/Aker/wiki)  
 
 
 ### Motivation
