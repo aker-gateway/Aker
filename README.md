@@ -3,7 +3,7 @@
 
 
 ### What is Aker?
-Aker is a security tool that helps you configure your own Linux ssh jump/bastion host. Named after an Egyptian mythology deity who guarded the borders, Aker would act as choke point through which all your sysadmins and support staff access Linux production servers. Aker SSH gateway includes a lot of security and automation features that would help you manage and administer thousands of Linux servers.  
+Aker is a security tool that helps you configure your own Linux ssh jump/bastion host. Named after an Egyptian mythology deity who guarded the borders, Aker would act as choke point through which all your sysadmins and support staff access Linux production servers. Aker SSH gateway includes a lot of security features that would help you manage and administer thousands of Linux servers at ease. For detailed look check [the wiki](https://github.com/aker-gateway/Aker/wiki)  
 
 
 ### Motivation
@@ -14,7 +14,7 @@ I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.c
 * Phase 0
   * Integration with an identity provider (FreeIPA for now)
   * Parsable audit logs (json for example to work with Elasticsearch)
-  * Highly available stetup
+  * Highly available setup
 
 * Phase 1
   * Admin WebUI
@@ -85,4 +85,4 @@ chsh -s /bin/aker/aker.py username
 ```
 
 ### Contributing
-Currently I work on the code in my free time, any assitance is highly appreciated. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
+Currently I work on the code in my free time, any assistance is highly appreciated. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
