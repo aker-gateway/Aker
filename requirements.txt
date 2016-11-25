@@ -1,0 +1,3 @@
+configparser
+urwid
+paramiko
