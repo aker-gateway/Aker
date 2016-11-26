@@ -7,9 +7,9 @@
 
 
 # Meta
-__version__ = '0.0.2'
-__version_info__ = (0, 0, 2)
-__license__ = "AGPLv3" 
+__version__ = '0.2.1'
+__version_info__ = (0, 2, 1)
+__license__ = "AGPLv3"
 __license_info__ = {
     "AGPLv3": {
         "product": "aker",
@@ -51,10 +51,10 @@ class Configuration(object):
 		if filename:
 			configparser.read(filename)
 			self.log_level = configparser.get('General', 'log_level')
-			
-			
-			
-		
+
+
+
+
 class User(object):
 	def __init__(self,username):
 		self.name = username
@@ -65,14 +65,14 @@ class User(object):
 		self.enabled = configparser.get(self.name, 'enabled')
 		self.ssh_hosts = {}
 		self.load_ssh_hosts(hosts)
-		
-		
+
+
 	def load_ssh_hosts(self,hosts):
 		for host in hosts:
 			#TODO: handle exception for incomplete or misplaced entry, i.e host,user,port
 			hostname,port,username = host.split(",")
 			self.ssh_hosts[hostname] = {'port': port , 'username': username}
-			
+
 	def get_priv_key(self):
 		try :
 			#TODO: check better identity options
@@ -84,7 +84,7 @@ class User(object):
 		else :
 			return privkey
 
-		
+
 class Aker(object):
 	""" Aker core module, this is the management module
 	"""
@@ -99,13 +99,13 @@ class Aker(object):
 		self.build_tui()
 
 
-		
+
 	def build_tui(self):
 		logging.debug("Core: Drawing TUI")
 		self.tui = tui.Window(self)
 		self.tui.draw()
 		self.tui.start()
-		
+
 	def init_connection(self,host):
 		screen_size = self.tui.loop.screen.get_cols_rows()
 		logging.debug("Core: pausing TUI")
@@ -131,15 +131,7 @@ class Aker(object):
 
 	def session_end_callback(self, session):
 		logging.info("Core: Finished session UUID {0} for user {1} to host {2}".format(session.uuid,self.posix_user,session.host))
-           
-            		
+
+
 if __name__ == '__main__':
 	Aker().build_tui()
-	
-		
-		
-		
-		
-		
-		
-
