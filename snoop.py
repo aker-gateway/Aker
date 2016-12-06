@@ -9,7 +9,7 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 
-from queue import Queue
+from Queue import Queue
 import logging
 import stat
 import threading
