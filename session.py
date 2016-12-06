@@ -35,7 +35,7 @@ class Session(object):
 		raise NotImplementedError
 		
 	def close_session(self):
-		self.aker.ssession_end_callback(self)
+		self.aker.session_end_callback(self)
 		
 	def kill_session(self, signum, stack):
 		#TODO : Change behavoir to show screen again
