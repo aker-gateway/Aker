@@ -30,14 +30,15 @@ import socket
 from configparser import ConfigParser
 import time
 
+from hosts import Hosts
 import tui
 from session import SSHSession
 from snoop import Sniffer
 
 
 config_file = "/etc/aker.ini"
-log_file = 'aker.log'
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename=log_file,level=logging.INFO)
+log_file = '/var/log/aker.log'
+
 
 
 class Configuration(object):
@@ -51,6 +52,8 @@ class Configuration(object):
 		if filename:
 			configparser.read(filename)
 			self.log_level = configparser.get('General', 'log_level')
+			self.ssh_port = configparser.get('General', 'ssh_port')
+			
 
 
 
@@ -60,29 +63,26 @@ class User(object):
 		self.name = username
 		configparser = ConfigParser()
 		configparser.read(config_file)
-		#TODO: Add excpetion to handle problems with users in config
-		hosts = configparser.get(self.name, 'hosts').split("\n")
-		self.enabled = configparser.get(self.name, 'enabled')
-		self.ssh_hosts = {}
-		self.load_ssh_hosts(hosts)
-
-
-	def load_ssh_hosts(self,hosts):
-		for host in hosts:
-			#TODO: handle exception for incomplete or misplaced entry, i.e host,user,port
-			hostname,port,username = host.split(",")
-			self.ssh_hosts[hostname] = {'port': port , 'username': username}
+		gateway_hostgroup = configparser.get('General', 'gateway_group')
+		self.hosts = Hosts(username,gateway_hostgroup)
+		self.allowed_ssh_hosts = self.hosts.list_allowed()
+		
 
 	def get_priv_key(self):
 		try :
 			#TODO: check better identity options
-			#TODO: get user priv key from configfile
 			privkey = paramiko.RSAKey.from_private_key_file(os.path.expanduser("~/.ssh/id_rsa"))
 		except Exception as e:
 			logging.error("Core: Invalid Private Key for user {0} : {1} ".format(self.name, e.message))
 			raise Exception("Core: Invalid Private Key")
 		else :
 			return privkey
+			
+	
+
+
+	
+    		
 
 
 class Aker(object):
@@ -94,7 +94,11 @@ class Aker(object):
 		self.posix_user = getpass.getuser()
 		self.user = User(self.posix_user)
 		self.log_level = self.config.log_level
+		self.port = self.config.ssh_port
 		self.sniffer = Sniffer()
+		for handler in logging.root.handlers[:]:
+			logging.root.removeHandler(handler)
+		logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename=log_file,level=self.config.log_level)
 		logging.info("Core: Starting up, user={0} from={1}:{2}".format(self.posix_user,self.config.src_ip,self.config.src_port))
 		self.build_tui()
 
