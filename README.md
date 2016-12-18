@@ -12,9 +12,11 @@ I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.c
 
 ### Roadmap
 * Phase 0
-  * Integration with an identity provider (FreeIPA for now)
+  * Integration with an identity provider (FreeIPA for now) - DONE !
+  * Integration with config management tools.
   * Parsable audit logs (json for example to work with Elasticsearch)
   * Highly available setup
+  
 
 * Phase 1
   * Admin WebUI
@@ -37,6 +39,7 @@ I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.c
 Software:
 - Linux (Tested on CentOS and ubuntu)
 - Python (Tested on 2.7)
+- FreeIPA (Tested on version 4.2 )
     
 Python Modules:
 - configparser
@@ -55,34 +58,30 @@ yum install python2-paramiko python-configparser python-urwid
 cp *.py /bin/aker/
 ```
 
-* Copy aker.ini in /etc/ and edit it to include users and servers like below :
+* Copy aker.ini in /etc/ and edit it like below :
 ```
 [General] 
-log_level = DEBUG
-
-[anazmy]
-;; is user enabled
-enabled = True
-
-;; hosts section include the hosts allowed
-;; for this user, one entry per line 
-;; format: hostname,port,username
-hosts = websrv1.example.com,22,root
-	srv2.example.com,22,root
-	oracldb.example.com,22,root
-	dbsrv1.example.com,22,root
+log_level = INFO
+ssh_port = 22
+# FreeIPA hostgroup name contatining Aker gateways
+# to be excluded from hosts presented to user
+gateway_group = gateways
 
 ```
 
-* Add `/bin/aker/aker.py` to /etc/shells 
+* chmod `/bin/aker/aker.py` 
 ```
-echo "/bin/aker/aker.py" >> /etc/shells 
+chmod 755 /bin/aker/aker.py
 ```
 
-* Change user shell to aker
+* Enforce aker on all users but root, edit sshd_config
 ```
-chsh -s /bin/aker/aker.py username
+Match Group *,!root
+    ForceCommand /bin/aker/aker.py
+
 ```
+
+* Restart ssh
 
 ### Contributing
 Currently I work on the code in my free time, any assistance is highly appreciated. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
