@@ -11,9 +11,10 @@ from configparser import ConfigParser
 import getpass
 import logging
 import os
-import paramiko
 import time
 import uuid
+
+import paramiko
 
 import tui
 from session import SSHSession

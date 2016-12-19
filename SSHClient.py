@@ -7,13 +7,14 @@
 import getpass
 import logging
 import os
-import paramiko
 import select
 import signal
 import socket
 import sys
 import termios
 import tty
+
+import paramiko
 
 __license__ = "AGPLv3"
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
