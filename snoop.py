@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#       Copyright 2016 Ahmed Nazmy 
+#       Copyright 2016 Ahmed Nazmy
 #
 import logging
 import os
@@ -51,6 +51,7 @@ class Sniffer(object):
             self._sniffer.stop()
             self._sniffer.join()
             self.log_filename = None
+
 
 class SessionSniffer(threading.Thread):
     def __init__(self, keys_queue):

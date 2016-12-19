@@ -20,10 +20,10 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 TIME_OUT = 10
 
+
 class Client(object):
     def __init__(self, session):
         self._session = session
-
 
 
 class SSHClient(Client):
@@ -31,15 +31,14 @@ class SSHClient(Client):
         super(SSHClient, self).__init__(session)
         self._socket = None
         logging.debug("Client: Client Created")
-        
+
     def connect(self, ip, port, size):
         self._size = size
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.settimeout(TIME_OUT)
         self._socket.connect((ip, port))
-        logging.debug("SSHClient: Connected to {0}:{1}".format(ip,port))
-        
-        
+        logging.debug("SSHClient: Connected to {0}:{1}".format(ip, port))
+
     def get_transport(self):
         transport = paramiko.Transport(self._socket)
         transport.set_keepalive(10)
@@ -75,7 +74,6 @@ class SSHClient(Client):
             transport.close()
         self._socket.close()
 
-            
     def _start_session(self, transport):
         chan = transport.open_session()
         cols, rows = self._size
@@ -86,7 +84,6 @@ class SSHClient(Client):
         self._session.close_session()
         transport.close()
         self._socket.close()
-
 
     def interactive_shell(self, chan):
         # Handle session IO
