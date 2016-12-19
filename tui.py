@@ -40,14 +40,17 @@ class Window(object):
         for hostname, value in hosts.items():
                 user = hosts[hostname]['username']
                 host = MenuItem("%s (%s)" % (hostname, user))
-                urwid.connect_signal(host, 'connect', self.host_chosen, hostname)  # host chosen action
+                # host chosen action
+                urwid.connect_signal(host, 'connect',
+                                     self.host_chosen, hostname)
                 body.append(urwid.AttrMap(host, 'body', focus_map='SSH_focus'))
         return urwid.ListBox(urwid.SimpleFocusListWalker(body))
 
     def host_chosen(self, choice):
         username = self.aker.user.ssh_hosts[choice]['username']
         port = self.aker.user.ssh_hosts[choice]['port']
-        logging.debug("TUI: init conenction to %s as %s on port %s" % (choice, username, port))
+        logging.debug("TUI: init conenction to %s as %s on port %s" %
+                      (choice, username, port))
         # os.system("ssh -l %s -p %s %s" % (username,port,choice))
         self.loop.draw_screen()
         self.aker.init_connection(choice)
@@ -87,7 +90,8 @@ class Window(object):
 
         # Edit Text area to capture user input
         self.search_edit = urwid.Edit("Type to search:\n")
-        urwid.connect_signal(self.search_edit, 'change', self.search_change, self.hosts_listbox)  # search field change action
+        urwid.connect_signal(self.search_edit, 'change', self.search_change,
+                             self.hosts_listbox)  # search field change action
 
         # Frame
         self.frame = urwid.Frame(self.hosts_map, header=self.search_edit)
@@ -101,11 +105,14 @@ class Window(object):
         self.header_map = urwid.AttrMap(self.header_widget, 'head')
 
         # Top most frame
-        self.top = urwid.Frame(self.frame, header=self.header_map, footer=self.footer)
+        self.top = urwid.Frame(self.frame, header=self.header_map,
+                               footer=self.footer)
         self.screen = urwid.raw_display.Screen()
 
         # MainLoop start
-        self.loop = urwid.MainLoop(self.top, palette=self.palette, unhandled_input=self.update_search_edit, screen=self.screen)
+        self.loop = urwid.MainLoop(self.top, palette=self.palette,
+                                   unhandled_input=self.update_search_edit,
+                                   screen=self.screen)
 
     def search_change(self, edit, text, list):
         logging.debug("TUI: search edit key <{0}>".format(text))
@@ -114,8 +121,10 @@ class Window(object):
             if text in hostentry:
                 user = self.aker.user.ssh_hosts[hostentry]['username']
                 host = MenuItem("%s (%s)" % (hostentry, user))
-                urwid.connect_signal(host, 'connect', self.host_chosen, hostentry)
-                list.body.append(urwid.AttrMap(host, 'body', focus_map='SSH_focus'))
+                urwid.connect_signal(host, 'connect', self.host_chosen,
+                                     hostentry)
+                list.body.append(urwid.AttrMap(host, 'body',
+                                               focus_map='SSH_focus'))
 
     def update_search_edit(self, key):
         if not urwid.is_mouse_event(key):

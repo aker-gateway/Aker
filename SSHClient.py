@@ -60,7 +60,7 @@ class SSHClient(Client):
                     transport.auth_password(user, getpass.getpass())
             self._start_session(transport)
         except EOFError as exc:
-            logging.error('Received EOFError.  Assuming bad SSH implementation.')
+            logging.error('EOFError.  Assuming bad SSH implementation.')
             logging.error('Original Erorr: %s', exc)
             self._handle_exception(transport)
         except Exception as e:

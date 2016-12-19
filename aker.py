@@ -34,7 +34,8 @@ __license_info__ = {
 
 config_file = "/etc/aker.ini"
 log_file = 'aker.log'
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', filename=log_file, level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                    filename=log_file, level=logging.INFO)
 
 
 class Configuration(object):
@@ -63,7 +64,8 @@ class User(object):
 
     def load_ssh_hosts(self, hosts):
         for host in hosts:
-            # TODO: handle exception for incomplete or misplaced entry, i.e host,user,port
+            # TODO: handle exception for incomplete or misplaced entry,
+            #       i.e host,user,port
             hostname, port, username = host.split(",")
             self.ssh_hosts[hostname] = {'port': port, 'username': username}
 
@@ -71,9 +73,12 @@ class User(object):
         try:
             # TODO: check better identity options
             # TODO: get user priv key from configfile
-            privkey = paramiko.RSAKey.from_private_key_file(os.path.expanduser("~/.ssh/id_rsa"))
+            privkey = paramiko.RSAKey.from_private_key_file(
+                os.path.expanduser("~/.ssh/id_rsa")
+            )
         except Exception as e:
-            logging.error("Core: Invalid Private Key for user {0} : {1} ".format(self.name, e.message))
+            logging.error("Core: Invalid Private Key for user {0} : {1} "
+                          .format(self.name, e.message))
             raise Exception("Core: Invalid Private Key")
         else:
             return privkey
@@ -89,7 +94,9 @@ class Aker(object):
         self.user = User(self.posix_user)
         self.log_level = self.config.log_level
         self.sniffer = Sniffer()
-        logging.info("Core: Starting up, user={0} from={1}:{2}".format(self.posix_user, self.config.src_ip, self.config.src_port))
+        logging.info("Core: Starting up, user={0} from={1}:{2}".format(
+            self.posix_user, self.config.src_ip, self.config.src_port)
+        )
         self.build_tui()
 
     def build_tui(self):
@@ -108,8 +115,13 @@ class Aker(object):
         # TODO: add err handling
         session.connect(screen_size)
         # TODO enhance sniffer code
-        session_log_filename = "{0}-{1}-{2}_{3}_{4}.log".format(self.posix_user, host, session_start_time, self.config.src_port, session_uuid)
-        logging.info("Core: Started session UUID {0} for user {1} to host {2}".format(session_uuid, self.posix_user, host))
+        session_log_filename = "{0}-{1}-{2}_{3}_{4}.log".format(
+            self.posix_user, host,
+            session_start_time, self.config.src_port,
+            session_uuid
+        )
+        logging.info("Core: Started session UUID {0} for user {1} to host {2}"
+                     .format(session_uuid, self.posix_user, host))
         self.sniffer.set_log_filename(session_log_filename)
         self.sniffer.capture()
         try:
@@ -121,7 +133,8 @@ class Aker(object):
             self.tui.search_edit.set_edit_text("")  # Clear selected hosts
 
     def session_end_callback(self, session):
-        logging.info("Core: Finished session UUID {0} for user {1} to host {2}".format(session.uuid, self.posix_user, session.host))
+        logging.info("Core: Finished session UUID {0} for user {1} to host {2}"
+                     .format(session.uuid, self.posix_user, session.host))
 
 
 if __name__ == '__main__':

@@ -67,7 +67,12 @@ class SessionSniffer(threading.Thread):
     def run(self):
         if self._log_filename:
             self._log_file = open(self._log_filename, "wb")
-            os.chmod(self._log_file.name, stat.S_IREAD | stat.S_IWRITE | stat.S_IWRITE | stat.S_IRGRP | stat.S_IROTH)
+            os.chmod(self._log_file.name,
+                     stat.S_IREAD |
+                     stat.S_IWRITE |
+                     stat.S_IWRITE |
+                     stat.S_IRGRP |
+                     stat.S_IROTH)
         while True:
             if not self._session_stop:
                 c = self._key_queue.get()
