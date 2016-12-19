@@ -45,11 +45,19 @@ class SSHClient(Client):
 		transport.start_client()
 		return transport
 
-	def start_session(self, user, private_key):
+	def start_session(self, user, auth_secret):
 		logging.debug("SSHClient: Authenticating using private key")
 		try:
 			transport = self.get_transport()
-			transport.auth_publickey(user, private_key)
+			# We get this if the `auth_secret` is a string instead
+			# of the object type for an SSH key.  Use this to try
+			# password authentication.  This is possible if there
+			# is no public SSH key for the user on the Aker
+			# gateway.
+			if isinstance(auth_secret, basestring):
+				transport.auth_password(user, auth_secret)
+			else:
+				transport.auth_publickey(user, auth_secret)
 			self._start_session(transport)
 		except Exception as e:
 			logging.error(e)
