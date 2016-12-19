@@ -2,18 +2,12 @@
 #
 #       Copyright 2016 Ahmed Nazmy
 #
-
-# Meta
-__license__ = "AGPLv3"
-__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
-
-
+import logging
 
 import urwid
-import aker
-import signal
-import logging
-import os
+
+__license__ = "AGPLv3"
+__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 class MenuItem(urwid.Text):

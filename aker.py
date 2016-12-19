@@ -7,6 +7,18 @@
 
 
 # Meta
+from configparser import ConfigParser
+import getpass
+import logging
+import os
+import paramiko
+import time
+import uuid
+
+import tui
+from session import SSHSession
+from snoop import Sniffer
+
 __version__ = '0.2.1'
 __version_info__ = (0, 2, 1)
 __license__ = "AGPLv3"
@@ -19,21 +31,6 @@ __license_info__ = {
         "license_format": "1.0",
     }
 }
-
-import logging
-import os
-import sys
-import uuid
-import getpass
-import paramiko
-import socket
-from configparser import ConfigParser
-import time
-
-import tui
-from session import SSHSession
-from snoop import Sniffer
-
 
 config_file = "/etc/aker.ini"
 log_file = 'aker.log'

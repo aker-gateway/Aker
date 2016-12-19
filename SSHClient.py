@@ -4,19 +4,19 @@
 #
 
 # Meta
-__license__ = "AGPLv3"
-__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
-
 import getpass
 import logging
+import os
 import paramiko
+import select
+import signal
 import socket
-import tty
 import sys
 import termios
-import signal
-import select
-import os
+import tty
+
+__license__ = "AGPLv3"
+__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 TIME_OUT = 10
 

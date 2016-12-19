@@ -2,16 +2,16 @@
 #
 #       Copyright 2016 Ahmed Nazmy
 #
+import getpass
+import logging
+import os
+import signal
 
-# Meta
+from SSHClient import SSHClient
+
 __license__ = "AGPLv3"
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
-import getpass
-import logging
-import signal
-import os
-from SSHClient import SSHClient
 
 class Session(object):
     """ Base class for sessions
