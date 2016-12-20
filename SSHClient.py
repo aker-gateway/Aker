@@ -46,7 +46,7 @@ class SSHClient(Client):
 		return transport
 
 	def start_session(self, user, private_key):
-		logging.debug("SSHClient: Authenticating using private key")
+		logging.debug("SSHClient: Authenticating using key-pair")
 		try:
 			transport = self.get_transport()
 			transport.auth_publickey(user, private_key)

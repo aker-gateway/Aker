@@ -22,11 +22,11 @@ class Session(object):
 	def __init__(self,aker_core,host,uuid):
 		self.aker= aker_core
 		self.host = host
-		self.host_user = self.aker.user.ssh_hosts[host]['username']
-		self.host_port = int(self.aker.user.ssh_hosts[host]['port'])
+		self.host_user = self.aker.user.name
+		self.host_port = int(self.aker.port)
 		self.uuid = uuid
 		logging.debug("Session: Base Session created")
-		#TODO : Add UUID shit 
+
 		
 	def connect(self, size):
 		self._client.connect(self.host, self.host_port, size)

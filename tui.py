@@ -45,16 +45,15 @@ class Window(object):
 	
 	def refresh_hosts(self,hosts):
 		body = []
-		for hostname, value in hosts.items():
-				user = hosts[hostname]['username']
-				host = MenuItem("%s (%s)" % (hostname,user))
-				urwid.connect_signal(host, 'connect', self.host_chosen, hostname) # host chosen action
-				body.append(urwid.AttrMap(host,'body', focus_map='SSH_focus'))
+		for hostname in hosts:
+			host = MenuItem("%s" % (hostname))
+			urwid.connect_signal(host, 'connect', self.host_chosen, hostname) # host chosen action
+			body.append(urwid.AttrMap(host,'body', focus_map='SSH_focus'))
 		return urwid.ListBox(urwid.SimpleFocusListWalker(body))
 	
 	def host_chosen(self,choice):
-		username = self.aker.user.ssh_hosts[choice]['username']
-		port = self.aker.user.ssh_hosts[choice]['port']
+		username = self.aker.user.name
+		port = self.aker.port
 		logging.debug("TUI: init conenction to %s as %s on port %s" % (choice,username,port))
 		#os.system("ssh -l %s -p %s %s" % (username,port,choice))
 		self.loop.draw_screen()
@@ -90,10 +89,10 @@ class Window(object):
             ('msg', "Quit:"),
             ('key', "F9"), " ",
             ('msg', "By:"),
-            ('key', "KrE80r")]
+            ('key', "Ahmed Nazmy")]
         
 		# Hosts ListBox 
-		self.hosts_listbox = self.refresh_hosts(self.aker.user.ssh_hosts)
+		self.hosts_listbox = self.refresh_hosts(self.aker.user.allowed_ssh_hosts)
 		self.hosts_map = urwid.AttrWrap(self.hosts_listbox,'body')
 		
         # Edit Text area to capture user input    
@@ -124,10 +123,9 @@ class Window(object):
 	def search_change(self,edit, text, list):
 		logging.debug("TUI: search edit key <{0}>".format(text))
 		del list.body[:] # clear listbox
-		for hostentry in self.aker.user.ssh_hosts:
+		for hostentry in self.aker.user.allowed_ssh_hosts:
 			if text in hostentry:
-				user = self.aker.user.ssh_hosts[hostentry]['username']
-				host = MenuItem("%s (%s)" % (hostentry,user))
+				host = MenuItem("%s" % (hostentry))
 				urwid.connect_signal(host, 'connect', self.host_chosen, hostentry)
 				list.body.append(urwid.AttrMap(host, 'body', focus_map='SSH_focus'))
 				
