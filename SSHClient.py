@@ -60,13 +60,20 @@ class SSHClient(Client):
 				except paramiko.ssh_exception.AuthenticationException:
 					transport.auth_password(user, getpass.getpass())
 			self._start_session(transport)
+		except EOFError as exc:
+			logging.error('Received EOFError.  Assuming bad SSH implementation.')
+			logging.error('Original Erorr: %s', exc)
+			self._handle_exception(transport)
 		except Exception as e:
 			logging.error(e)
-			self._session.close_session()
-			if transport:
-				transport.close()
-			self._socket.close()
+			self._handle_exception(transport)
 			raise e
+
+	def _handle_exception(self, transport):
+		self._session.close_session()
+		if transport:
+			transport.close()
+		self._socket.close()
 
 			
 	def _start_session(self, transport):
