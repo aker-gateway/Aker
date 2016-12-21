@@ -7,6 +7,7 @@
 __license__ = "AGPLv3"
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
+import getpass
 import logging
 import paramiko
 import socket
@@ -45,11 +46,19 @@ class SSHClient(Client):
 		transport.start_client()
 		return transport
 
-	def start_session(self, user, private_key):
-		logging.debug("SSHClient: Authenticating using private key")
+	def start_session(self, user, auth_secret):
+		logging.debug("SSHClient: Authenticating session.")
 		try:
 			transport = self.get_transport()
-			transport.auth_publickey(user, private_key)
+			if isinstance(auth_secret, basestring):
+				transport.auth_password(user, auth_secret)
+			else:
+				try:
+					transport.auth_publickey(user, auth_secret)
+				# Failed to authenticate with SSH key, so
+				# try a password instead.
+				except paramiko.ssh_exception.AuthenticationException:
+					transport.auth_password(user, getpass.getpass())
 			self._start_session(transport)
 		except Exception as e:
 			logging.error(e)
