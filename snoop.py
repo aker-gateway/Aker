@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
 #
-#       Copyright 2016 Ahmed Nazmy 
+#       Copyright 2016 Ahmed Nazmy
 #
-
-# Meta
-__license__ = "AGPLv3"
-__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
-
-
-
-from Queue import Queue
 import logging
+import os
+from Queue import Queue
 import stat
 import threading
-import os
 import sys
-import codecs
+
+__license__ = "AGPLv3"
+__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 class Sniffer(object):
@@ -57,6 +52,7 @@ class Sniffer(object):
             self._sniffer.join()
             self.log_filename = None
 
+
 class SessionSniffer(threading.Thread):
     def __init__(self, keys_queue):
         threading.Thread.__init__(self)
@@ -71,7 +67,12 @@ class SessionSniffer(threading.Thread):
     def run(self):
         if self._log_filename:
             self._log_file = open(self._log_filename, "wb")
-            os.chmod(self._log_file.name, stat.S_IREAD | stat.S_IWRITE | stat.S_IWRITE | stat.S_IRGRP | stat.S_IROTH)
+            os.chmod(self._log_file.name,
+                     stat.S_IREAD |
+                     stat.S_IWRITE |
+                     stat.S_IWRITE |
+                     stat.S_IRGRP |
+                     stat.S_IROTH)
         while True:
             if not self._session_stop:
                 c = self._key_queue.get()
