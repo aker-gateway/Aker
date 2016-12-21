@@ -90,7 +90,7 @@ class Window(object):
             ('msg', "Quit:"),
             ('key', "F9"), " ",
             ('msg', "By:"),
-            ('key', "KrE80r")]
+            ('key', "Ahmed Nazmy")]
         
 		# Hosts ListBox 
 		self.hosts_listbox = self.refresh_hosts(self.aker.user.ssh_hosts)
