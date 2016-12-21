@@ -20,8 +20,8 @@ import tui
 from session import SSHSession
 from snoop import Sniffer
 
-__version__ = '0.2.1'
-__version_info__ = (0, 2, 1)
+__version__ = '0.2.2'
+__version_info__ = (0, 2, 2)
 __license__ = "AGPLv3"
 __license_info__ = {
     "AGPLv3": {
