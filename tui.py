@@ -82,9 +82,9 @@ class Window(object):
             ('msg', "Quit:"),
             ('key', "F9"), " ",
             ('msg', "By:"),
-            ('key', "KrE80r")]
-
-        # Hosts ListBox
+            ('key', "Ahmed Nazmy")]
+        
+        # Hosts ListBox 
         self.hosts_listbox = self.refresh_hosts(self.aker.user.ssh_hosts)
         self.hosts_map = urwid.AttrWrap(self.hosts_listbox, 'body')
 
