@@ -45,15 +45,12 @@ Python Modules:
 
 
 ### Installation
-* First the dependencies 
-~~~
-yum install python2-paramiko python-configparser python-urwid
-~~~
+* Install `aker`:
+```
+pip install git+https://github.com/aker-gateway/Aker
+```
 
-* Copying files
-```
-cp *.py /bin/aker/
-```
+> This will change once Aker is pushed to PyPI.
 
 * Copy aker.ini in /etc/ and edit it to include users and servers like below :
 ```
@@ -74,14 +71,14 @@ hosts = websrv1.example.com,22,root
 
 ```
 
-* Add `/bin/aker/aker.py` to /etc/shells 
+* Add `aker` to /etc/shells 
 ```
-echo "/bin/aker/aker.py" >> /etc/shells 
+echo "$(which aker)" >> /etc/shells 
 ```
 
-* Change user shell to aker
+* Change user shell to `aker`
 ```
-chsh -s /bin/aker/aker.py username
+chsh -s $(which aker) username
 ```
 
 ### Contributing
