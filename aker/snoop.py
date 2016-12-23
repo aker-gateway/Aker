@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 #
 #       Copyright 2016 Ahmed Nazmy
-#
 import logging
 import os
 from Queue import Queue
 import stat
 import threading
 import sys
-
-__license__ = "AGPLv3"
-__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 class Sniffer(object):

@@ -6,9 +6,6 @@ import logging
 
 import urwid
 
-__license__ = "AGPLv3"
-__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
-
 
 class MenuItem(urwid.Text):
     def __init__(self, caption):

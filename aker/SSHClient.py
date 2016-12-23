@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 #
 #       Copyright 2016 Ahmed Nazmy
-#
-
-# Meta
 import getpass
 import logging
 import os
@@ -16,8 +13,6 @@ import tty
 
 import paramiko
 
-__license__ = "AGPLv3"
-__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 TIME_OUT = 10
 

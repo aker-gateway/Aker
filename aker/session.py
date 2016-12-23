@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 #
 #       Copyright 2016 Ahmed Nazmy
-#
+from __future__ import absolute_import
 import getpass
 import logging
 import os
 import signal
 
-from SSHClient import SSHClient
-
-__license__ = "AGPLv3"
-__author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
+from aker.SSHClient import SSHClient
 
 
 class Session(object):

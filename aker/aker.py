@@ -4,9 +4,7 @@
 #       Copyright 2016 ahmed@nazmy.io
 #
 # For license information see LICENSE.txt
-
-
-# Meta
+from __future__ import absolute_import
 from configparser import ConfigParser
 import getpass
 import logging
@@ -16,22 +14,10 @@ import uuid
 
 import paramiko
 
-import tui
-from session import SSHSession
-from snoop import Sniffer
+import aker.tui
+from aker.session import SSHSession
+from aker.snoop import Sniffer
 
-__version__ = '0.2.2'
-__version_info__ = (0, 2, 2)
-__license__ = "AGPLv3"
-__license_info__ = {
-    "AGPLv3": {
-        "product": "aker",
-        "users": 0,  # 0 being unlimited
-        "customer": "Unsupported",
-        "version": __version__,
-        "license_format": "1.0",
-    }
-}
 
 config_file = "/etc/aker.ini"
 log_file = 'aker.log'
@@ -102,7 +88,7 @@ class Aker(object):
 
     def build_tui(self):
         logging.debug("Core: Drawing TUI")
-        self.tui = tui.Window(self)
+        self.tui = aker.tui.Window(self)
         self.tui.draw()
         self.tui.start()
 
