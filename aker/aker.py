@@ -124,5 +124,10 @@ class Aker(object):
                      .format(session.uuid, self.posix_user, session.host))
 
 
-if __name__ == '__main__':
+def main():
+    """Entrypoint for Aker."""
     Aker().build_tui()
+
+
+if __name__ == '__main__':
+    main()

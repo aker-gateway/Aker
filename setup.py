@@ -20,5 +20,6 @@ setup(
     license=__license__,
     packages=['aker'],
     install_requires=['configparser', 'urwid', 'paramiko'],
-    zip_safe=False
+    zip_safe=False,
+    entry_points={'console_scripts': ['aker = aker.aker:main']}
 )
