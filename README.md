@@ -13,6 +13,7 @@ I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.c
 ### Roadmap
 * Phase 0
   * Integration with an identity provider (FreeIPA for now) - DONE !
+    * Setup your environment in 15 minutes using [this ansible playbook](https://github.com/aker-gateway/aker-freeipa-playbook)
   * Integration with config management tools.
   * Parsable audit logs (json for example to work with Elasticsearch)
   * Highly available setup
