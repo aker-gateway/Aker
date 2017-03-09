@@ -55,7 +55,6 @@ class Window(object):
 		username = self.aker.user.name
 		port = self.aker.port
 		logging.debug("TUI: init conenction to %s as %s on port %s" % (choice,username,port))
-		#os.system("ssh -l %s -p %s %s" % (username,port,choice))
 		self.loop.draw_screen()
 		self.aker.init_connection(choice)
 		

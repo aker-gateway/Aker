@@ -7,8 +7,8 @@
 
 
 # Meta
-__version__ = '0.3.1'
-__version_info__ = (0, 3, 1)
+__version__ = '0.4.2'
+__version_info__ = (0, 4, 2)
 __license__ = "AGPLv3"
 __license_info__ = {
     "AGPLv3": {
@@ -33,12 +33,14 @@ import time
 from hosts import Hosts
 import tui
 from session import SSHSession
-from snoop import Sniffer
+from snoop import SSHSniffer
 
 
 config_file = "/etc/aker.ini"
-log_file = '/var/log/aker.log'
-
+# FIXME: below log needs chmod 777 since we dont have
+# server compnent 
+log_file = '/var/log/aker/aker.log'
+session_log_dir = '/var/log/aker/'
 
 
 class Configuration(object):
@@ -95,7 +97,6 @@ class Aker(object):
 		self.user = User(self.posix_user)
 		self.log_level = self.config.log_level
 		self.port = self.config.ssh_port
-		self.sniffer = Sniffer()
 		for handler in logging.root.handlers[:]:
 			logging.root.removeHandler(handler)
 		logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename=log_file,level=self.config.log_level)
@@ -114,22 +115,20 @@ class Aker(object):
 		screen_size = self.tui.loop.screen.get_cols_rows()
 		logging.debug("Core: pausing TUI")
 		self.tui.pause()
+		#TODO: check for shorter yet unique uuid
 		session_uuid = uuid.uuid4()
 		session_start_time = time.strftime("%Y%m%d-%H%M%S")
 		session = SSHSession(self,host,session_uuid)
 		#TODO: add err handling
+		sniffer = SSHSniffer(self.posix_user,self.config.src_port,host,session_uuid,screen_size)
+		session.attach_sniffer(sniffer)
+		logging.info("Core: Starting session UUID {0} for user {1} to host {2}".format(session_uuid,self.posix_user,host))
 		session.connect(screen_size)
-		#TODO enhance sniffer code
-		session_log_filename = "{0}-{1}-{2}_{3}_{4}.log".format(self.posix_user, host, session_start_time, self.config.src_port, session_uuid)
-		logging.info("Core: Started session UUID {0} for user {1} to host {2}".format(session_uuid,self.posix_user,host))
-		self.sniffer.set_log_filename(session_log_filename)
-		self.sniffer.capture()
 		try:
 			session.start_session()
 		finally:
-			self.sniffer.restore()
+			session.stop_sniffer()
 			self.tui.restore()
-			#TODO: better handling through session_ended_handler
 			self.tui.search_edit.set_edit_text("") # Clear selected hosts
 
 

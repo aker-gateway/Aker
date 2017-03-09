@@ -16,19 +16,43 @@ import termios
 import signal
 import select
 import os
+import time
+import fcntl
+
 
 TIME_OUT = 10
 
 class Client(object):
 	def __init__(self, session):
 		self._session = session
+		self.sniffers = []
+		
+	def attach_sniffer(self,sniffer):
+		self.sniffers.append(sniffer)
 
+	def stop_sniffer(self):
+		for sniffer in self.sniffers:
+			sniffer.stop()
+
+	@staticmethod
+	def get_console_dimensions():
+		cols, rows = 80, 24
+		try:
+			fmt = 'HH'
+			buffer = struct.pack(fmt, 0, 0)
+			result = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, buffer)
+			columns, lines = struct.unpack(fmt, result)
+		except Exception, e:
+			pass
+		finally:
+			return columns, lines
 
 
 class SSHClient(Client):
 	def __init__(self, session):
 		super(SSHClient, self).__init__(session)
 		self._socket = None
+		self.channel = None
 		logging.debug("Client: Client Created")
 		
 	def connect(self, ip, port, size):
@@ -59,45 +83,96 @@ class SSHClient(Client):
 			self._socket.close()
 			raise e
 
-			
+
+	def attach(self, sniffer):
+		"""
+		Adds a sniffer to the session
+		"""
+		self.sniffers.append(sniffer)
+
+	def _set_sniffer_logs(self):
+		for sniffer in self.sniffers:
+			try:
+				# Incase a sniffer without logs
+				sniffer.set_logs()
+			except AttributeError:
+				pass
+		
 	def _start_session(self, transport):
-		chan = transport.open_session()
-		cols, rows = self._size
-		chan.get_pty('xterm', cols, rows)
-		chan.invoke_shell()
-		self.interactive_shell(chan)
-		chan.close()
+		self.channel = transport.open_session()
+		columns, lines = self._size
+		self.channel.get_pty('xterm', columns, lines)
+		self.channel.invoke_shell()
+		try:
+			signal.signal(signal.SIGWINCH, self.sigwinch)
+		except:
+			pass
+		self._set_sniffer_logs()
+		self.interactive_shell(self.channel)
+		self.channel.close()
 		self._session.close_session()
 		transport.close()
 		self._socket.close()
 
-
+	def sigwinch(self, signal, data):
+		columns, lines = get_console_dimensions()
+		logging.debug("SSHClient: setting terminal to %s columns and %s lines" % (columns, lines))
+		self.channel.resize_pty(columns, lines)
+		for sniffer in self.sniffers:
+			sniffer.sigwinch(columns, lines)
+            
+        
 	def interactive_shell(self, chan):
-		# Handle session IO
+		"""
+		Handles ssh IO
+		"""
 		sys.stdout.flush()
+		oldtty = termios.tcgetattr(sys.stdin)
 		try:
-			signal.signal(signal.SIGHUP, self._session.kill_session)
-			oldtty = termios.tcgetattr(sys.stdin)
 			tty.setraw(sys.stdin.fileno())
 			tty.setcbreak(sys.stdin.fileno())
 			chan.settimeout(0.0)
+            
 			while True:
-				r, w, e = select.select([chan, sys.stdin], [], [])
+				try:
+					r, w, e = select.select([chan, sys.stdin], [], [])
+					flag = fcntl.fcntl(sys.stdin, fcntl.F_GETFL, 0)
+					fcntl.fcntl(sys.stdin.fileno(), fcntl.F_SETFL, flag|os.O_NONBLOCK)
+				except Exception as e:
+					logging.error(e)
+					pass
+                    
 				if chan in r:
 					try:
-						x = chan.recv(1024)
-						if len(x) == 0:
+						x = chan.recv(10240)
+						len_x = len(x)
+						if len_x == 0:
 							break
-						sys.stdout.write(x)
-						sys.stdout.flush()
+						for sniffer in self.sniffers:
+							sniffer.channel_filter(x)
+						try:
+							nbytes = os.write(sys.stdout.fileno(), x)
+							logging.debug("SSHClient: wrote %s bytes to stdout" % nbytes)
+							sys.stdout.flush()
+						except OSError as msg:
+							if msg.errno == errno.EAGAIN:
+								continue
 					except socket.timeout:
-						break
+						pass
+                        
 				if sys.stdin in r:
-					x = os.read(sys.stdin.fileno(), 1)
-					if len(x) == 0:
-						break
-					chan.send(x)
+					try:
+						buf = os.read(sys.stdin.fileno(), 4096)
+					except OSError as e:
+						logging.error(e)
+						pass
+					for sniffer in self.sniffers:
+						sniffer.stdin_filter(buf)
+						
+					chan.send(buf)
+											
+               
+		finally:
+			logging.debug("SSHClient: interactive session ending")
 			termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
-		except Exception as e:
-			logging.error(e)
-			raise e
+						

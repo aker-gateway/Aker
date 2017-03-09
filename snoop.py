@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#       Copyright 2016 Ahmed Nazmy 
+#	   Copyright 2016 Ahmed Nazmy 
 #
 
 # Meta
@@ -9,86 +9,234 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 
-from Queue import Queue
 import logging
-import stat
-import threading
-import os
-import sys
 import codecs
+import re
+import time
+import json
+import os
+import pyte
 
 
 class Sniffer(object):
-    def __init__(self):
-        self.original_stdout = sys.stdout
-        self.log_filename = None
-        self._keys_queue = Queue()
-        logging.debug("Sniffer: Base Sniffer Created")
+	"""
+	Captures session IO to files
+	"""
+	def __init__(self,user,src_port,host,uuid,screen_size):
+		self.user = user
+		self.host = host
+		self.uuid = uuid
+		self.src_port = src_port
+		self.log_file = None
+		self.log_timer = None
+		self.log_cmds = None
+		self.session_start_time = time.strftime("%H%M%S")
+		self.session_start_date = time.strftime("%Y%m%d")
+		self.session_date_time = time.strftime("%Y/%m/%d %H:%M:%S")
+		self.today = time.strftime("%Y%m%d")
+		self.session_log = "{0}_{1}_{2}_{3}".format(self.user,self.host, self.session_start_time, self.uuid)
+		self.stream = None
+		self.screen = None
+		self.term_cols, self.term_rows = screen_size
+		self._fake_terminal()
+		logging.debug("Sniffer: Sniffer Created")
+		
+		
+	def _fake_terminal(self):
+		logging.debug("Sniffer: Creating Pyte screen with cols %i and rows %i" % (self.term_cols, self.term_rows))		
+		self.screen = pyte.Screen(self.term_cols, self.term_rows)
+		self.stream = pyte.ByteStream()
+		self.stream.attach(self.screen)
 
-    def fileno(self):
-        return self.original_stdout.fileno()
+		
+		
+	def extract_command(self,buf):
+		"""
+		Handle terminal escape sequences
+		"""
+		command = ""
+		# Remove CR (\x0D) in middle of data
+		# probably will need better handling 
+		# See https://github.com/selectel/pyte/issues/66
+		logging.debug ("buf b4 is %s" % str(buf))
+		buf = buf.replace('\x0D', '')
+		logging.debug ("buf after is %s" % buf)
+		try:
+			self.stream.feed(buf)
+			output = "".join([l for l in self.screen.display if len(l.strip()) > 0]).strip()
+			#for line in reversed(self.screen.buffer):
+				#output = "".join(map(operator.attrgetter("data"), line)).strip()
+			logging.debug ("output is %s" % output)
+			command = self.ps1_parser(output)
+		except Exception as e:
+			logging.error("Sniffer: extract command error {0} ".format(e.message))
+			pass
+		self.screen.reset()
+		return command
+		
+					
+	def ps1_parser(self,command):
+		"""
+		Extract commands from PS1 or mysql> 
+		"""
+		result = None
+		match = re.compile('\[?.*@.*\]?[\$#]\s').split(command)
+		logging.debug("Sniffer: command match is %s" % match)
+		if match:
+			result = match[-1].strip()
+		else:
+			# No PS1, try finding mysql
+			match = re.split('mysql>\s', command)
+			logging.debug("Sniffer: command match is %s" % match)
+			if match:
+				result = match[-1].strip()
+		return result
+		
+		
+	@staticmethod
+	def got_cr_lf(string):
+		newline_chars = ['\n', '\r', '\r\n']
+		for char in newline_chars:
+			if char in string:
+				return True
+		return False
 
-    def set_log_filename(self, log_filename):
-        self.log_filename = log_filename
+	@staticmethod	
+	def findlast(s, substrs):
+		i = -1
+		result = None
+		for substr in substrs:
+			pos = s.rfind(substr)
+			if pos > i:
+				i = pos
+				result = substr
+		return result
+    
+		
 
-    def write(self, c):
-        self._keys_queue.put(c)
-        self.original_stdout.write(c.decode(self.original_stdout.encoding))
+	def set_logs(self):
+		# local import
+		from aker import session_log_dir
+		today_sessions_dir = os.path.join(session_log_dir, self.session_start_date)
+		log_file_path = os.path.join(today_sessions_dir, self.session_log)
+		try:
+			os.makedirs(today_sessions_dir, 0o777)
+			os.chmod(today_sessions_dir, 0o777)
+		except OSError as e:
+			logging.debug("Sniffer: set_logs OS Error {0} ".format(e.message))
+		try:
+			log_file = open(log_file_path + '.log', 'a')
+			log_timer = open(log_file_path + '.timer', 'a')
+			log_cmds = log_file_path + '.cmds'
+		except IOError:
+			logging.debug("Sniffer: set_logs IO error {0} ".format(e.message))
+			
+		log_file.write('Session Start %s\r\n' % self.session_date_time)
+		self.log_file = log_file
+		self.log_timer = log_timer
+		self.log_cmds = log_cmds
+		
+		
+	def stop(self):
+		session_end = time.strftime("%Y/%m/%d %H:%M:%S")
+		#TODO , again I better create a json object!
+		jsonmsg= { 'ver': '1',
+		   'host': self.host,
+		   'user': self.user,
+		   'session': str(self.uuid),
+		   'sessionstart': self.session_date_time,
+		   'sessionend': session_end,
+		   'timing': session_end,
+		   'cmd': ''
+		   }
+		   
+		try:
+			with open(self.log_cmds, 'a') as outfile:
+				jsonout = json.dumps(jsonmsg)
+				outfile.write(jsonout + '\n')
+		except Exception as e:
+			logging.error("Sniffer: close session files error {0} ".format(e.message))
+			
+		self.log_file.write('Session End %s' % session_end)
+		self.log_file.close()
+		self.log_timer.close()
 
-    def read(self, fd):
-        data = os.read(fd, 1024)
-        self._keys_queue.put(data)
-        return data
 
-    def flush(self):
-        self.original_stdout.flush()
 
-    def capture(self):
-        if self.log_filename:
-            sys.stdout = self
-            self._sniffer = SessionSniffer(self._keys_queue)
-            self._sniffer.set_log_filename(self.log_filename)
-            self._sniffer.start()
 
-    def restore(self):
-        if self.log_filename:
-            sys.stdout = self.original_stdout
-            self._sniffer.stop()
-            self._sniffer.join()
-            self.log_filename = None
 
-class SessionSniffer(threading.Thread):
-    def __init__(self, keys_queue):
-        threading.Thread.__init__(self)
-        self._key_queue = keys_queue
-        self._log_file = None
-        self._session_stop = False
-        logging.debug("Sniffer: SessionSniffer Created")
 
-    def set_log_filename(self, log_filename):
-        self._log_filename = log_filename
+class SSHSniffer(Sniffer):
+	def __init__(self,user,src_port,host,uuid,screen_size):
+		super(SSHSniffer, self).__init__(user,src_port,host,uuid,screen_size)
+		self.vim_regex = re.compile(r'\x1b\[\?1049', re.X)
+		self.vim_data = ""
+		self.stdin_active = False
+		self.in_alt_mode = False
+		self.buf = ""
+		self.vim_data = ""
+		self.before_timestamp = time.time()
+		self.start_timestamp = self.before_timestamp 
+		self.start_alt_mode = set(['\x1b[?47h', '\x1b[?1049h', '\x1b[?1047h'])
+		self.end_alt_mode = set(['\x1b[?47l', '\x1b[?1049l', '\x1b[?1047l'])
+		self.alt_mode_flags = tuple(self.start_alt_mode) + tuple(self.end_alt_mode)
+		
 
-    def run(self):
-        if self._log_filename:
-            self._log_file = open(self._log_filename, "wb")
-            os.chmod(self._log_file.name,0o700)
-        while True:
-            if not self._session_stop:
-                c = self._key_queue.get()
-                self.write_input(c)
-                self._key_queue.task_done()
-            else:
-                if self._log_filename:
-                    self._log_file.close()
-                logging.debug("Sniffer: Stop")
-                break
+	def channel_filter(self, x):
+		now_timestamp = time.time()
+		#Write delta time and number of chrs to timer log
+		self.log_timer.write('%s %s\n' % (round(now_timestamp - self.before_timestamp, 4), len(x)))
+		self.log_timer.flush()
+		self.log_file.write(x)
+		self.log_file.flush()
+		self.before_timestamp = now_timestamp
+		self.vim_data += x
+		#Accumlate data when in stdin_active
+		if self.stdin_active:
+			self.buf += x
 
-    def stop(self):
-        self._session_stop = True
-        self._key_queue.put("")
 
-    def write_input(self, c):
-        if self._log_file:
-            self._log_file.write(c)
-            self._log_file.flush()
-            os.fsync(self._log_file.fileno())
+	def stdin_filter(self, x):
+		self.stdin_active = True
+		flag = self.findlast(self.vim_data, self.alt_mode_flags)
+		if flag is not None:
+			if flag in self.start_alt_mode:
+				logging.debug("In ALT mode")
+				self.in_alt_mode = True
+			elif flag in self.end_alt_mode:
+				logging.debug("Out of ALT mode")
+				self.in_alt_mode = False
+		# We got CR/LF?			
+		if self.got_cr_lf(str(x)):
+				
+			if not self.in_alt_mode:
+				logging.debug("Sniffer: self.buf is : %s" % self.buf)
+				self.buf = self.extract_command(self.buf)
+				if self.buf is not None:
+					now = time.strftime("%Y/%m/%d %H:%M:%S")
+					# Maybe will add a seperate object for json later
+					jsonmsg= { 'ver': '1',
+							   'host': self.host,
+							   'user': self.user,
+							   'session': str(self.uuid),
+							   'sessionstart': self.session_date_time,
+							   'sessionend': '',
+							   'timing': now,
+							   'cmd': codecs.decode(self.buf,'UTF-8',"replace")
+							   }
+					try:
+						with open(self.log_cmds, 'a') as outfile:
+							#ELK's filebeat require a jsonlines like file (http://jsonlines.org/)
+							jsonout = json.dumps(jsonmsg)
+							outfile.write(jsonout + '\n')
+					except Exception as e:
+						logging.error("Sniffer: stdin_filter error {0} ".format(e.message))
+					jsonmsg= {}
+					
+			self.buf = ""
+			self.vim_data = ""	
+			self.stdin_active = False		
+
+	def sigwinch(self,columns,lines):
+		logging.debug("Sniffer: Setting Pyte screen size to cols %i and rows %i" % (columns, lines))		
+		self.screen.resize(columns, lines)

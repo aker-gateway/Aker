@@ -11,12 +11,12 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 import logging
 import signal
 import os
+import time
 from SSHClient import SSHClient
 
 class Session(object):
-	""" Base class for sessions
-		Different type of sessions to be
-		added later
+	""" 
+	Base Session class 
 	"""
 	
 	def __init__(self,aker_core,host,uuid):
@@ -24,10 +24,18 @@ class Session(object):
 		self.host = host
 		self.host_user = self.aker.user.name
 		self.host_port = int(self.aker.port)
+		self.src_port = self.aker.config.src_port
 		self.uuid = uuid
 		logging.debug("Session: Base Session created")
 
 		
+	def attach_sniffer(self,sniffer):
+		self._client.attach_sniffer(sniffer)
+	
+	def stop_sniffer(self):
+		self._client.stop_sniffer()
+		
+			
 	def connect(self, size):
 		self._client.connect(self.host, self.host_port, size)
         
@@ -38,10 +46,9 @@ class Session(object):
 		self.aker.session_end_callback(self)
 		
 	def kill_session(self, signum, stack):
-		#TODO : Change behavoir to show screen again
-		logging.debug("Session: Session Killed")
+		logging.debug("Session: Session ended")
 		self.close_session()
-		os.kill(os.getpid(), signal.SIGKILL)
+
 
 
 class SSHSession(Session):
