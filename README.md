@@ -46,7 +46,8 @@ Python Modules:
 - configparser
 - urwid
 - paramiko
-
+- wcwidth
+- pyte
 
 ### Installation
 * First the dependencies 
