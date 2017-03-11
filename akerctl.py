@@ -48,7 +48,10 @@ def show_cmds(cmds_file):
 		for line in json_file:
 			data.append(json.loads(line))
 		for k in data:
-			print (k['timing'] + ':' + k['cmd'])
+			try :
+				print (k['timing'] + ':' + k['cmd'])
+			except Exception:
+				pass
 
 
 def replay(log_file, time_file):
