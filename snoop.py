@@ -139,7 +139,7 @@ class Sniffer(object):
 		
 	def stop(self):
 		session_end = time.strftime("%Y/%m/%d %H:%M:%S")
-		#TODO , again I better create a json object!
+		#Sayonara
 		jsonmsg= { 'ver': '1',
 		   'host': self.host,
 		   'user': self.user,
@@ -147,7 +147,6 @@ class Sniffer(object):
 		   'sessionstart': self.session_date_time,
 		   'sessionend': session_end,
 		   'timing': session_end,
-		   'cmd': ''
 		   }
 		   
 		try:
@@ -220,7 +219,6 @@ class SSHSniffer(Sniffer):
 							   'user': self.user,
 							   'session': str(self.uuid),
 							   'sessionstart': self.session_date_time,
-							   'sessionend': '',
 							   'timing': now,
 							   'cmd': codecs.decode(self.buf,'UTF-8',"replace")
 							   }
