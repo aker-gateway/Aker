@@ -207,11 +207,18 @@ class SSHSniffer(Sniffer):
 				self.in_alt_mode = False
 		# We got CR/LF?			
 		if self.got_cr_lf(str(x)):
-				
 			if not self.in_alt_mode:
 				logging.debug("Sniffer: self.buf is : %s" % self.buf)
+				
+				# Did x capture the last character and CR ?
+				if len(str(x)) > 1:
+					self.buf = self.buf + x
+				logging.debug("Sniffer: x is : %s" % x)
+				
 				self.buf = self.extract_command(self.buf)
-				if self.buf is not None:
+				
+				# If we got something back, log it
+				if self.buf is not None and self.buf != "":
 					now = time.strftime("%Y/%m/%d %H:%M:%S")
 					# Maybe will add a seperate object for json later
 					jsonmsg= { 'ver': '1',

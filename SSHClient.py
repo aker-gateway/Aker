@@ -132,7 +132,7 @@ class SSHClient(Client):
 			tty.setraw(sys.stdin.fileno())
 			tty.setcbreak(sys.stdin.fileno())
 			chan.settimeout(0.0)
-            
+
 			while True:
 				try:
 					r, w, e = select.select([chan, sys.stdin], [], [])
