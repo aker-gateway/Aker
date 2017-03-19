@@ -30,7 +30,7 @@ import socket
 from configparser import ConfigParser
 import time
 
-from hosts import Hosts
+from hosts import AuthorityFactory
 import tui
 from session import SSHSession
 from snoop import SSHSniffer
@@ -66,7 +66,7 @@ class User(object):
 		configparser = ConfigParser()
 		configparser.read(config_file)
 		gateway_hostgroup = configparser.get('General', 'gateway_group')
-		self.hosts = Hosts(username,gateway_hostgroup)
+		self.hosts = AuthorityFactory.getAuthority("IPA")(username,gateway_hostgroup)
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
 		
 
