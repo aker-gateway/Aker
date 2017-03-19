@@ -36,7 +36,7 @@ class Client(object):
 
 	@staticmethod
 	def get_console_dimensions():
-		cols, rows = 80, 24
+		cols, lines = 80, 24
 		try:
 			fmt = 'HH'
 			buffer = struct.pack(fmt, 0, 0)
