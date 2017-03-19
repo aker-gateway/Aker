@@ -81,6 +81,13 @@ celerybeat-schedule
 # virtualenv
 venv/
 ENV/
+local/
+include/
+bin/
+
+# sublime 
+*.sublime-*
+
 
 # Spyder project settings
 .spyderproject
