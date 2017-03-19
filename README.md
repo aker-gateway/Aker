@@ -33,7 +33,7 @@ I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.c
   
   
 ### See it in action
-[![Aker - in action](https://i1.ytimg.com/vi/O-boM3LbVT4/hqdefault.jpg)](https://www.youtube.com/watch?v=O-boM3LbVT4)
+[![Aker - in action](https://i1.ytimg.com/vi/O-boM3LbVT4/hqdefault.jpg)](https://www.youtube.com/watch?v=H6dCCw666Xw)
 
 
 ### Requirements
