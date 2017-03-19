@@ -66,6 +66,7 @@ class User(object):
 		configparser = ConfigParser()
 		configparser.read(config_file)
 		gateway_hostgroup = configparser.get('General', 'gateway_group')
+		# TODO: load authority type from configuration
 		self.hosts = AuthorityFactory.getAuthority("IPA")(username,gateway_hostgroup)
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
 		

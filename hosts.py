@@ -177,7 +177,7 @@ class IPA(Authority):
 		self._load_user_allowed_hosts()
 		return self._allowed_ssh_hosts
 
-
+# TODO: remove the placeholder and allow configuration from json file.
 class JsonConfig(Authority):
 	'''
 	Fetch the authority informataion from a JSON configuration 
@@ -190,14 +190,16 @@ class JsonConfig(Authority):
 		pass
 
 	def list_allowed(self):
+		# TODO: Don't return hardcoded value
 		return ["pinky.ratman.org"]
 
 class AuthorityFactory(object):
-	'''
-	Fetch the authority class based on a type
-	'''
+	#TODO: Register authorities via annotations?
 	@staticmethod
 	def getAuthority(choice):
+		'''
+		Fetch the authority class based on a type
+		'''
 		types = {
 			"json":lambda: JsonConfig,
 			"IPA": lambda: IPA if _IPA_LOADED_ else JsonConfig
