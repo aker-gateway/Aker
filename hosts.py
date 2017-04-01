@@ -7,27 +7,52 @@
 __license__ = "AGPLv3"
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
-
-from ipalib import api, errors, output, util
-from ipalib import Command, Str, Flag, Int
-from types import NoneType
-from ipalib.cli import to_cli
-from ipalib import _, ngettext
-from ipapython.dn import DN
-from ipalib.plugable import Registry
-import pyhbac
+import json
 import logging
+from types import NoneType
 
-class Hosts(object):
+_IPA_LOADED_=True
+
+try:
+	import pyhbac
+	from ipalib import api, errors, output, util
+	from ipalib import Command, Str, Flag, Int
+	from ipalib.cli import to_cli
+	from ipalib import _, ngettext
+	from ipapython.dn import DN
+	from ipalib.plugable import Registry
+except ImportError as e:
+	logging.warn("There was an error loading ipalib, falling back to JSON")
+	_IPA_LOADED_=False
+
+
+class Authority(object):
 	'''
-	Abstract represtation of  user allowed hosts.
-	Currently relaying on FreeIPA API
+	Base class to implement shared functionality
+	This should enable different authorities to manage allowed connections 
 	'''
+
 	def __init__(self,username,gateway_hostgroup):
 		self._all_ssh_hosts = []
 		self._allowed_ssh_hosts = []
 		self.user = username
 		self.gateway_hostgroup = gateway_hostgroup
+	
+	def list_allowed(self):
+		pass
+
+
+	def _load_all_hosts(self):
+		pass
+
+
+class IPA(Authority):
+	'''
+	Abstract represtation of  user allowed hosts.
+	Currently relaying on FreeIPA API
+	'''
+	def __init__(self,username,gateway_hostgroup):
+		super(IPA,self).__init__(username,gateway_hostgroup)
 		api.bootstrap(context='cli')
 		api.finalize()
 		try:
@@ -151,5 +176,36 @@ class Hosts(object):
 		self._all_ssh_hosts = self._load_all_hosts(self.api)
 		self._load_user_allowed_hosts()
 		return self._allowed_ssh_hosts
-		
-		
+
+# TODO: remove the placeholder and allow configuration from json file.
+class JsonConfig(Authority):
+	'''
+	Fetch the authority informataion from a JSON configuration 
+	'''
+	def __init__(self,username,gateway_hostgroup):
+		super(JsonConfig,self).__init__(username,gateway_hostgroup)
+		self.__init_json_config()
+
+	def __init_json_config(self):
+		pass
+
+	def list_allowed(self):
+		# TODO: Don't return hardcoded value
+		return ["akergateway.io"]
+
+class AuthorityFactory(object):
+	#TODO: Register authorities via annotations?
+	@staticmethod
+	def getAuthority(choice):
+		'''
+		Fetch the authority class based on a type
+		'''
+		types = {
+			"json":lambda: JsonConfig,
+			"IPA": lambda: IPA if _IPA_LOADED_ else JsonConfig
+		}
+		selection = types.get(choice,None)
+		if selection is None:
+			raise Exception("core: \"{}\" is not a valid authority".format(choice))
+		else:
+			return selection()
