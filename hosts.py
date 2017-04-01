@@ -191,7 +191,7 @@ class JsonConfig(Authority):
 
 	def list_allowed(self):
 		# TODO: Don't return hardcoded value
-		return ["pinky.ratman.org"]
+		return ["akergateway.io"]
 
 class AuthorityFactory(object):
 	#TODO: Register authorities via annotations?
