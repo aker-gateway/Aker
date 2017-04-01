@@ -52,7 +52,7 @@ class IPA(Authority):
 	Currently relaying on FreeIPA API
 	'''
 	def __init__(self,username,gateway_hostgroup):
-		super(Hosts,self).__init__(username,gateway_hostgroup)
+		super(IPA,self).__init__(username,gateway_hostgroup)
 		api.bootstrap(context='cli')
 		api.finalize()
 		try:
