@@ -187,11 +187,44 @@ class JsonConfig(Authority):
 		self.__init_json_config()
 
 	def __init_json_config(self):
-		pass
+		if configparser is defined:
+			hosts_file = configparser.get("general","hosts_file")
+		else:
+			hosts_file = "hosts.json"
+		JSON = json.load(open(hosts_file,'r'))
+		self._all_ssh_hosts = JSON["hosts"]
+		self.users = JSON.get("users")
+		self.groups = JSON.get("groups")
+		self.__define_allowed_hosts()
+
+	def __define_allowed_hosts(self):
+		user = next((user for user in self.users if user.get("username") == self.user), None)
+		if(user == None):
+			self._allowed_ssh_hosts = []
+			return
+		userGroups = user.get("groups")
+		
+		for h in self._all_ssh_hosts:
+			if h.get("users") is not None:
+				for u in h.get("users"):
+				 	if self.user == u:
+						self.__add_host_to_allowed(h.get("hostname"))
+
+
+		if userGroups is not None:
+			for h in self._all_ssh_hosts:
+				if h.get("groups") is not None:
+					for g in user.get("groups"):
+						if g in h.get("groups"):
+							self.__add_host_to_allowed(h.get("hostname"))
+
+	def __add_host_to_allowed(self,host):
+		if host not in self._allowed_ssh_hosts:
+			self._allowed_ssh_hosts.insert(0,host)		
 
 	def list_allowed(self):
 		# TODO: Don't return hardcoded value
-		return ["akergateway.io"]
+		return self._allowed_ssh_hosts
 
 class AuthorityFactory(object):
 	#TODO: Register authorities via annotations?
