@@ -36,10 +36,10 @@ from session import SSHSession
 from snoop import SSHSniffer
 
 
-config_file = "aker.ini"
+config_file = "/etc/aker.ini"
 # FIXME: below log needs chmod 777 since we dont have
 # server compnent 
-log_file = 'aker.log'
+log_file = '/var/log/aker/aker.log'
 session_log_dir = '/var/log/aker/'
 
 class Configuration(object):
