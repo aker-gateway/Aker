@@ -36,10 +36,10 @@ from session import SSHSession
 from snoop import SSHSniffer
 
 
-config_file = "/etc/aker.ini"
+config_file = "aker.ini"
 # FIXME: below log needs chmod 777 since we dont have
 # server compnent 
-log_file = '/var/log/aker/aker.log'
+log_file = 'aker.log'
 session_log_dir = '/var/log/aker/'
 
 
@@ -66,8 +66,9 @@ class User(object):
 		configparser = ConfigParser()
 		configparser.read(config_file)
 		gateway_hostgroup = configparser.get('General', 'gateway_group')
+		authority = configparser.get('General','authority')
 		# TODO: load authority type from configuration
-		self.hosts = AuthorityFactory.getAuthority("IPA")(username,gateway_hostgroup)
+		self.hosts = AuthorityFactory.getAuthority(authority)(username,gateway_hostgroup)
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
 		
 
