@@ -27,7 +27,7 @@ import uuid
 import getpass
 import paramiko
 import socket
-from configparser import ConfigParser
+from configparser import ConfigParser,NoOptionError
 import time
 
 from hosts import AuthorityFactory
@@ -42,7 +42,6 @@ config_file = "aker.ini"
 log_file = 'aker.log'
 session_log_dir = '/var/log/aker/'
 
-
 class Configuration(object):
 	def __init__(self, filename):
 		remote_connection = os.environ.get('SSH_CLIENT', '0.0.0.0 0')
@@ -50,25 +49,32 @@ class Configuration(object):
 		self.src_port = remote_connection.split()[1]
 		self.session_uuid = uuid.uuid1()
 		#TODO: Check file existance , handle exception
-		configparser = ConfigParser()
+		self.configparser = ConfigParser()
 		if filename:
-			configparser.read(filename)
-			self.log_level = configparser.get('General', 'log_level')
-			self.ssh_port = configparser.get('General', 'ssh_port')
+			self.configparser.read(filename)
+			self.log_level = self.configparser.get('General', 'log_level')
+			self.ssh_port = self.configparser.get('General', 'ssh_port')
 			
-
+	def get(self,*args):
+		if len(args) == 3:
+			try:
+				return self.configparser.get(args[0],args[1])
+			except NoOptionError as e:
+				return args[2] 
+		if len(args) == 2:
+			return self.configparser.get(args[0],args[1])
+		else:
+			return self.configparser.get('General',args[0])
 
 
 
 class User(object):
 	def __init__(self,username):
 		self.name = username
-		configparser = ConfigParser()
-		configparser.read(config_file)
-		gateway_hostgroup = configparser.get('General', 'gateway_group')
-		authority = configparser.get('General','authority')
+		gateway_hostgroup = config.get('gateway_group')
+		authority = config.get('authority')
 		# TODO: load authority type from configuration
-		self.hosts = AuthorityFactory.getAuthority(authority)(username,gateway_hostgroup)
+		self.hosts = AuthorityFactory.getAuthority(authority)(config,username,gateway_hostgroup)
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
 		
 
@@ -94,16 +100,17 @@ class Aker(object):
 	"""
 
 	def __init__(self,log_level = 'INFO'):
-		self.config = Configuration(config_file)
+		global config
+		config = Configuration(config_file)
+		self.config = config
 		self.posix_user = getpass.getuser()
 		self.user = User(self.posix_user)
-		self.log_level = self.config.log_level
-		self.port = self.config.ssh_port
+		self.log_level = config.log_level
+		self.port = config.ssh_port
 		for handler in logging.root.handlers[:]:
 			logging.root.removeHandler(handler)
-		logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename=log_file,level=self.config.log_level)
-		logging.info("Core: Starting up, user={0} from={1}:{2}".format(self.posix_user,self.config.src_ip,self.config.src_port))
-		self.build_tui()
+		logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename=log_file,level=config.log_level)
+		logging.info("Core: Starting up, user={0} from={1}:{2}".format(self.posix_user,config.src_ip,config.src_port))
 
 
 
@@ -122,7 +129,7 @@ class Aker(object):
 		session_start_time = time.strftime("%Y%m%d-%H%M%S")
 		session = SSHSession(self,host,session_uuid)
 		#TODO: add err handling
-		sniffer = SSHSniffer(self.posix_user,self.config.src_port,host,session_uuid,screen_size)
+		sniffer = SSHSniffer(self.posix_user,config.src_port,host,session_uuid,screen_size)
 		session.attach_sniffer(sniffer)
 		logging.info("Core: Starting session UUID {0} for user {1} to host {2}".format(session_uuid,self.posix_user,host))
 		session.connect(screen_size)

@@ -51,7 +51,7 @@ class IPA(Authority):
 	Abstract represtation of  user allowed hosts.
 	Currently relaying on FreeIPA API
 	'''
-	def __init__(self,username,gateway_hostgroup):
+	def __init__(self,config,username,gateway_hostgroup):
 		super(IPA,self).__init__(username,gateway_hostgroup)
 		api.bootstrap(context='cli')
 		api.finalize()
@@ -182,15 +182,13 @@ class JsonConfig(Authority):
 	'''
 	Fetch the authority informataion from a JSON configuration 
 	'''
-	def __init__(self,username,gateway_hostgroup):
+	def __init__(self,config,username,gateway_hostgroup):
 		super(JsonConfig,self).__init__(username,gateway_hostgroup)
+		self.config = config
 		self.__init_json_config()
 
 	def __init_json_config(self):
-		if configparser is defined:
-			hosts_file = configparser.get("general","hosts_file")
-		else:
-			hosts_file = "hosts.json"
+		hosts_file = self.config.get("General","hosts_file","hosts.json")
 		JSON = json.load(open(hosts_file,'r'))
 		self._all_ssh_hosts = JSON["hosts"]
 		self.users = JSON.get("users")
