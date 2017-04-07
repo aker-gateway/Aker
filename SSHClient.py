@@ -16,6 +16,7 @@ import termios
 import signal
 import select
 import os
+import errno
 import time
 import fcntl
 
