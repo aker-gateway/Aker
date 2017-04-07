@@ -1,0 +1,28 @@
+{
+	"groups":[
+		"admin"
+	],
+	"users":[
+		{
+			"username":"aker",
+			"keyfile":"~/.ssh/id_rsa_local",
+			"groups":["admin"]
+		}
+	],
+	"hosts":[
+		{
+			"name":"Aker Gateway",
+			"username":"aker-override",
+			"hostname":"akergateway.io",
+			"port":"22",
+			"key":"~/.ssh/id_rsa",
+			"groups":[
+				"admin"
+			]
+		},
+		{
+			"name":"Aker Gateway (Default key)",
+			"hostname":"akergateway.io"	
+		}
+	]
+}
