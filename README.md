@@ -1,3 +1,5 @@
+[![Join the chat at https://gitter.im/Akergateway/Aker](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Akergateway/Aker?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 # Aker SSH Gateway
 ![alt text](aker_logo.png "Aker")
 
