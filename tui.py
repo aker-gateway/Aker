@@ -14,7 +14,7 @@ import aker
 import signal
 import logging
 import os
-
+from popup import SimplePopupLauncher
 
 class MenuItem(urwid.Text):
     def __init__(self, caption):
@@ -53,8 +53,9 @@ class Window(object):
 	
 	def host_chosen(self,choice):
 		username = self.aker.user.name
+		# TODO: per host port
 		port = self.aker.port
-		logging.debug("TUI: init conenction to %s as %s on port %s" % (choice,username,port))
+		logging.debug("TUI: user %s chose server %s " % (username,choice))
 		self.loop.draw_screen()
 		self.aker.init_connection(choice)
 		
@@ -68,6 +69,7 @@ class Window(object):
             ('foot', 'light gray', 'dark gray'),  # Footer Separator
             ('key', 'light green', 'dark gray', 'bold'),
             ('title', 'white', 'black', 'bold'),
+            ('popup', 'white', 'dark red'),
             ('msg', 'yellow', 'dark gray'),
             ('SSH', 'dark blue', 'light gray', 'underline'),
             ('SSH_focus', 'light green', 'dark blue', 'standout')] # Focus
@@ -85,6 +87,8 @@ class Window(object):
             ('key', "PgDn"), ",",
             ('msg', "Select:"),
             ('key', "Enter"), " ",
+            ('msg', "Refresh:"),
+            ('key', "F5"), " ",
             ('msg', "Quit:"),
             ('key', "F9"), " ",
             ('msg', "By:"),
@@ -106,16 +110,22 @@ class Window(object):
 		self.footer_text = urwid.Text(self.footer_text, align='center')
 		self.footer = urwid.AttrMap(self.footer_text, 'foot')
 		
+		# Popup
+		self.popup = SimplePopupLauncher()
+		self.popup_padding = urwid.Padding(self.popup, 'right', 20)
+		self.popup_map = urwid.AttrMap(self.popup_padding, 'indicator')
+		
 		# Header
 		self.header_widget = urwid.Text(self.header_text, align='left')
 		self.header_map = urwid.AttrMap(self.header_widget, 'head')
+		self.header = urwid.Columns([self.header_map, self.popup_map])
 		
 		# Top most frame
-		self.top = urwid.Frame(self.frame, header=self.header_map, footer=self.footer)
+		self.top = urwid.Frame(self.frame, header=self.header, footer=self.footer)
 		self.screen = urwid.raw_display.Screen()
 		
 		#MainLoop start
-		self.loop = urwid.MainLoop(self.top, palette=self.palette, unhandled_input=self.update_search_edit,screen=self.screen)
+		self.loop = urwid.MainLoop(self.top, palette=self.palette, unhandled_input=self.update_search_edit,screen=self.screen, pop_ups=True)
 		
 		
 
@@ -128,16 +138,30 @@ class Window(object):
 				urwid.connect_signal(host, 'connect', self.host_chosen, hostentry)
 				list.body.append(urwid.AttrMap(host, 'body', focus_map='SSH_focus'))
 				
+
 	def update_search_edit(self,key):
 		if not urwid.is_mouse_event(key):
 			if key == 'esc':
 				self.search_edit.set_edit_text("")
+			elif key == 'f5':
+				self.fetch_hosts_from_idp()
 			elif key == 'f9':
-				# TODO: Fix the need for multiple F9s to exit
+				logging.info("TUI: User {0} logging out of Aker".format(self.aker.user.name))
 				raise urwid.ExitMainLoop()
 			else:
 				self.search_edit.keypress((10, ), key)
 		return True
+	
+	def fetch_hosts_from_idp(self):
+		self.aker.user.refresh_allowed_hosts(False)
+		#TODO: refactor below ?
+		self.search_change(self.search_edit,"",self.hosts_listbox)
+		self.popup_message("Hosts Refreshed")
+		
+		
+	def popup_message(self, message):
+		self.popup.message = str(message)
+		self.popup.open_pop_up()
 
 	def start(self):
 		logging.debug("TUI: tui started")

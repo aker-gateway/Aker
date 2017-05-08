@@ -16,6 +16,7 @@ import time
 import json
 import os
 import pyte
+import errno
 
 
 class Sniffer(object):
@@ -123,7 +124,8 @@ class Sniffer(object):
 			os.makedirs(today_sessions_dir, 0o777)
 			os.chmod(today_sessions_dir, 0o777)
 		except OSError as e:
-			logging.debug("Sniffer: set_logs OS Error {0} ".format(e.message))
+			if e.errno != errno.EEXIST: 
+				logging.error("Sniffer: set_logs OS Error {0} ".format(e.message))
 		try:
 			log_file = open(log_file_path + '.log', 'a')
 			log_timer = open(log_file_path + '.timer', 'a')

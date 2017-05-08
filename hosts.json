@@ -1,28 +1,56 @@
 {
-	"groups":[
-		"admin"
+	"groups": [
+		"lnxadmins",
+		"dbadmins"
 	],
-	"users":[
+	"users": [{
+			"username": "anazmy",
+			"keyfile": "~/.ssh/id_rsa",
+			"groups": ["lnxadmins"]
+		},
 		{
-			"username":"aker",
-			"keyfile":"~/.ssh/id_rsa_local",
-			"groups":["admin"]
+			"username": "jsmith",
+			"keyfile": "~/.ssh/id_rsa",
+			"groups": ["dbadmins"]
 		}
 	],
-	"hosts":[
-		{
-			"name":"Aker Gateway",
-			"username":"aker-override",
-			"hostname":"akergateway.io",
-			"port":"22",
-			"key":"~/.ssh/id_rsa",
-			"groups":[
-				"admin"
+	"hosts": [{
+			"name": "web1.ipa.example",
+			"hostname": "web1.ipa.example",
+			"port": "22",
+			"key": "~/.ssh/id_rsa",
+			"groups": [
+				"lnxadmins"
 			]
 		},
 		{
-			"name":"Aker Gateway (Default key)",
-			"hostname":"akergateway.io"	
+			"name": "web2.ipa.example",
+			"hostname": "web2.ipa.example",
+			"port": "22",
+			"key": "~/.ssh/id_rsa",
+			"groups": [
+				"lnxadmins"
+			]
+		},
+		{
+			"name": "db1.ipa.example",
+			"hostname": "db1.ipa.example",
+			"port": "22",
+			"key": "~/.ssh/id_rsa",
+			"groups": [
+				"lnxadmins",
+				"dbadmins"
+			]
+		},
+		{
+			"name": "db2.ipa.example",
+			"hostname": "db2.ipa.example",
+			"port": "22",
+			"key": "~/.ssh/id_rsa",
+			"groups": [
+				"lnxadmins",
+				"dbadmins"
+			]
 		}
 	]
 }

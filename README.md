@@ -12,81 +12,118 @@ Aker is a security tool that helps you configure your own Linux ssh jump/bastion
 I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.com/products/cryptoauditor/) and [fudo](http://www.wheelsystems.com/en/products/wheel-fudo-psm/), such tools  are beneficial if you're seeking becoming PCI-DSS or HIPAA compliant for example, regardless of security standards compliance access to the server should be controlled and organized in a way convenient to both traditional and cloud workloads.
 
 
+### Current Featuers
+
+* Supports FreeIPA 4.2 , 4.3 (Optional)
+* Extensible, [Write Your Own Module](https://github.com/aker-gateway/Aker/wiki/IdP-Modules#writing-your-custom-idp-module)
+* Session Playback
+* Extract Session Commands
+* SIEM-Ready json Session Logs
+* Elasticsearch Integration
+
 ### Roadmap
 * Phase 0
-  * Integration with an identity provider (FreeIPA for now) - DONE !
-    * Setup your environment in 15 minutes using [this ansible playbook](https://github.com/aker-gateway/aker-freeipa-playbook)
-  * Integration with config management tools.
-  * Parsable audit logs (json for example to work with Elasticsearch)
-    * Integrate with Elasticsearch using [this ansible playbook](https://github.com/aker-gateway/aker-elk-playbook)
+  * Integration with an identity provider (FreeIPA)
+  * Extendable Modular structure, plugin your own module
+  * Integration with config management tools
+  * Parsable audit logs (json, shipped to Elasticsearch)
   * Highly available setup
-  
+  * Session playback
+
 
 * Phase 1
   * Admin WebUI
-  * Session playback
   * Live session monitoring
   * Cloud support (AWS,OpenStack etc..) or On-premises deployments
   * Command filtering (Prevent destructive commands like rm -rf)
   * Encrypt sessions logs stored on disk.
-  
+
 * Phase 2
   * Support for graphical protocols (RDP, VNC, X11) monitoring
-  * User productivity dashboard 
-  
-  
+  * User productivity dashboard
+
+
 ### See it in action
 [![Aker - in action](https://i1.ytimg.com/vi/O-boM3LbVT4/hqdefault.jpg)](https://www.youtube.com/watch?v=H6dCCw666Xw)
 
 
 ### Requirements
 Software:
-- Linux (Tested on CentOS and ubuntu)
+- Linux (Tested on CentOS, Fedora and ubuntu)
 - Python (Tested on 2.7)
-- FreeIPA (Tested on version 4.2 )
-    
+- (Optional) FreeIPA, Tested on FreeIPA 4.2 & 4.3
+- redis
+
 Python Modules:
 - configparser
 - urwid
 - paramiko
 - wcwidth
 - pyte
+- redis
 
 ### Installation
-* First the dependencies 
-~~~
-yum install python2-paramiko python-configparser python-urwid
-~~~
 
-* Copying files
-```
-cp *.py /bin/aker/
-```
 
-* Copy aker.ini in /etc/ and edit it like below :
-```
-[General] 
-log_level = INFO
-ssh_port = 22
-# FreeIPA hostgroup name contatining Aker gateways
-# to be excluded from hosts presented to user
-gateway_group = gateways
+* Automated :
+	* Use [this ansible playbook](https://github.com/aker-gateway/aker-freeipa-playbook)
 
-```
 
-* chmod `/bin/aker/aker.py` 
-```
-chmod 755 /bin/aker/aker.py
-```
+* Manually:
 
-* Enforce aker on all users but root, edit sshd_config
-```
-Match Group *,!root
-    ForceCommand /bin/aker/aker.py
+	* Assumptions:
+		* Machine enrolled to FreeIPA domain
 
-```
 
-* Restart ssh
+	* First the dependencies
+		~~~
+		yum install redis
+		pip install -r requirements.txt
+		~~~
+
+	* Copying files
+    	~~~
+    	cp *.py /bin/aker/
+    	~~~
+
+	* Create /etc/aker and copy aker.ini in it and edit it like below :
+
+      ```
+      [General]
+      log_level = INFO
+      ssh_port = 22
+
+      # Identity Provider to determine the list of available hosts
+      # options shipped are IPA, Json. Default is IPA
+      idp = IPA
+      hosts_file = /etc/aker/hosts.json
+
+      # FreeIPA hostgroup name contatining Aker gateways
+      # to be excluded from hosts presented to user
+      gateway_group = gateways
+      ```
+
+	* Set files executable perms
+      ```
+      chmod 755 /bin/aker/aker.py
+      chmod 755 /bin/aker/akerctl.py
+      ```
+
+	* Setup logdir and perms
+      ```
+      mkdir /var/log/aker
+      chmod 777 /var/log/aker
+      ```
+
+	* Enforce aker on all users but root, edit sshd_config
+      ~~~
+      Match Group *,!root
+      ForceCommand /bin/aker/aker.py
+      ~~~
+
+	* Restart ssh
+
+
 
 ### Contributing
 Currently I work on the code in my free time, any assistance is highly appreciated. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
