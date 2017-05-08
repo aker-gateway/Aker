@@ -7,8 +7,8 @@
 
 
 # Meta
-__version__ = '0.4.2'
-__version_info__ = (0, 4, 2)
+__version__ = '0.4.4'
+__version_info__ = (0, 4, 4)
 __license__ = "AGPLv3"
 __license_info__ = {
     "AGPLv3": {
@@ -30,15 +30,13 @@ import socket
 from configparser import ConfigParser,NoOptionError
 import time
 
-from hosts import AuthorityFactory
+from hosts import Hosts
 import tui
 from session import SSHSession
 from snoop import SSHSniffer
 
 
-config_file = "/etc/aker.ini"
-# FIXME: below log needs chmod 777 since we dont have
-# server compnent 
+config_file = "/etc/aker/aker.ini"
 log_file = '/var/log/aker/aker.log'
 session_log_dir = '/var/log/aker/'
 
@@ -54,13 +52,13 @@ class Configuration(object):
 			self.configparser.read(filename)
 			self.log_level = self.configparser.get('General', 'log_level')
 			self.ssh_port = self.configparser.get('General', 'ssh_port')
-			
+
 	def get(self,*args):
 		if len(args) == 3:
 			try:
 				return self.configparser.get(args[0],args[1])
 			except NoOptionError as e:
-				return args[2] 
+				return args[2]
 		if len(args) == 2:
 			return self.configparser.get(args[0],args[1])
 		else:
@@ -72,11 +70,11 @@ class User(object):
 	def __init__(self,username):
 		self.name = username
 		gateway_hostgroup = config.get('gateway_group')
-		authority = config.get('authority')
-		# TODO: load authority type from configuration
-		self.hosts = AuthorityFactory.getAuthority(authority)(config,username,gateway_hostgroup)
+		idp = config.get('idp')
+		logging.debug("Core: using Identity Provider {0}".format(idp))
+		self.hosts = Hosts(config,self.name,gateway_hostgroup,idp)
 		self.allowed_ssh_hosts = self.hosts.list_allowed()
-		
+
 
 	def get_priv_key(self):
 		try :
@@ -87,12 +85,15 @@ class User(object):
 			raise Exception("Core: Invalid Private Key")
 		else :
 			return privkey
-			
-	
+
+	def refresh_allowed_hosts(self,fromcache):
+		logging.info("Core: reloading hosts for user {0} from backened identity provider".format(self.name))
+		self.allowed_ssh_hosts = self.hosts.list_allowed(from_cache=fromcache)
 
 
-	
-    		
+
+
+
 
 
 class Aker(object):
@@ -104,14 +105,16 @@ class Aker(object):
 		config = Configuration(config_file)
 		self.config = config
 		self.posix_user = getpass.getuser()
-		self.user = User(self.posix_user)
 		self.log_level = config.log_level
 		self.port = config.ssh_port
+
+		#Setup logging first thing
 		for handler in logging.root.handlers[:]:
 			logging.root.removeHandler(handler)
 		logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',filename=log_file,level=config.log_level)
 		logging.info("Core: Starting up, user={0} from={1}:{2}".format(self.posix_user,config.src_ip,config.src_port))
 
+		self.user = User(self.posix_user)
 
 
 	def build_tui(self):
