@@ -53,7 +53,7 @@ class Session(object):
 
 class SSHSession(Session):
 	""" Wrapper around SSHClient instantiating 
-		a new SSHClient instance everytime
+		a new SSHClient instance every time
 	"""
 	
 	def __init__(self, aker_core, host,uuid):

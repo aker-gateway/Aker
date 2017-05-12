@@ -15,9 +15,8 @@ import sys
 import os
 
 
-
 class IdPFactory(object):
-	#TODO: Register authorities via annotations?
+
 	@staticmethod
 	def getIdP(choice):
 		

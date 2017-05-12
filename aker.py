@@ -46,7 +46,7 @@ class Configuration(object):
 		self.src_ip = remote_connection.split()[0]
 		self.src_port = remote_connection.split()[1]
 		self.session_uuid = uuid.uuid1()
-		#TODO: Check file existance , handle exception
+		#TODO: Check file existence, handle exception
 		self.configparser = ConfigParser()
 		if filename:
 			self.configparser.read(filename)

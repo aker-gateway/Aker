@@ -222,7 +222,7 @@ class SSHSniffer(Sniffer):
 				# If we got something back, log it
 				if self.buf is not None and self.buf != "":
 					now = time.strftime("%Y/%m/%d %H:%M:%S")
-					# Maybe will add a seperate object for json later
+					# Maybe will add a separate object for json later
 					jsonmsg= { 'ver': '1',
 							   'host': self.host,
 							   'user': self.user,
