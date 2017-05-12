@@ -94,3 +94,6 @@ bin/
 
 # Rope project settings
 .ropeproject
+
+.idea
+
