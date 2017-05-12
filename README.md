@@ -74,16 +74,17 @@ Python Modules:
 
 	* Common Steps (FreeIPA or Json):
 
-		* First the dependencies
+		* Clone the repo
+		~~~
+		git clone https://github.com/aker-gateway/Aker.git /usr/bin/aker/
+		~~~
+		
+		* Install dependencies
 			~~~
 			yum install redis # redis-server for Ubunutu
 			pip install -r requirements.txt
 			~~~
 
-		* Copying files
-		~~~
-		git clone https://github.com/aker-gateway/Aker.git /usr/bin/aker/
-		~~~
 
 		* Set files executable perms
 	      ```
