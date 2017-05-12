@@ -76,7 +76,7 @@ Python Modules:
 
 		* First the dependencies
 			~~~
-			yum install redis
+			yum install redis # redis-server for Ubunutu
 			pip install -r requirements.txt
 			~~~
 
