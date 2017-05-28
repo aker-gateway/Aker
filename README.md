@@ -70,60 +70,87 @@ Python Modules:
 
 
 * Manually:
+- Aker can be setup on a FreeIPA client or indepentantly using json config file.
 
-	* Assumptions:
-		* Machine enrolled to FreeIPA domain
+	* Common Steps (FreeIPA or Json):
 
-
-	* First the dependencies
+		* Clone the repo
 		~~~
-		yum install redis
-		pip install -r requirements.txt
+		git clone https://github.com/aker-gateway/Aker.git /usr/bin/aker/
 		~~~
+		
+		* Install dependencies
+			~~~
+			yum install redis # redis-server for Ubunutu
+			pip install -r requirements.txt
+			~~~
 
-	* Copying files
-    	~~~
-    	cp *.py /bin/aker/
-    	~~~
 
-	* Create /etc/aker and copy aker.ini in it and edit it like below :
+		* Set files executable perms
+	      ```
+	      chmod 755 /usr/bin/aker/aker.py
+	      chmod 755 /usr/bin/aker/akerctl.py
+	      ```
 
-      ```
-      [General]
-      log_level = INFO
-      ssh_port = 22
+		* Setup logdir and perms
+	      ```
+	      mkdir /var/log/aker
+	      chmod 777 /var/log/aker
+	      ```
 
-      # Identity Provider to determine the list of available hosts
-      # options shipped are IPA, Json. Default is IPA
-      idp = IPA
-      hosts_file = /etc/aker/hosts.json
+		* Enforce aker on all users but root, edit sshd_config
+	      ~~~
+	      Match Group *,!root
+	      ForceCommand /usr/bin/aker/aker.py
+	      ~~~
 
-      # FreeIPA hostgroup name contatining Aker gateways
-      # to be excluded from hosts presented to user
-      gateway_group = gateways
-      ```
+		* Restart ssh
+	
+	
+	
+	* Choosing FreeIPA:
+		* Assumptions:
+			* Aker server already enrolled to FreeIPA domain
+		
+		* Create /etc/aker and copy /usr/bin/aker/aker.ini in it and edit it like below :
 
-	* Set files executable perms
-      ```
-      chmod 755 /bin/aker/aker.py
-      chmod 755 /bin/aker/akerctl.py
-      ```
+		      ```
+		      [General]
+		      log_level = INFO
+		      ssh_port = 22
 
-	* Setup logdir and perms
-      ```
-      mkdir /var/log/aker
-      chmod 777 /var/log/aker
-      ```
+		      # Identity Provider to determine the list of available hosts
+		      # options shipped are IPA, Json. Default is IPA
+		      idp = IPA
+		      hosts_file = /etc/aker/hosts.json
 
-	* Enforce aker on all users but root, edit sshd_config
-      ~~~
-      Match Group *,!root
-      ForceCommand /bin/aker/aker.py
-      ~~~
+		      # FreeIPA hostgroup name contatining Aker gateways
+		      # to be excluded from hosts presented to user
+		      gateway_group = gateways
+		      ```
 
-	* Restart ssh
 
-* Choosing Json:
 
+	* Choosing Json:
+		* Create /etc/aker and copy /usr/bin/aker/aker.ini in it and edit it like below :
+
+		      ```
+		      [General]
+		      log_level = INFO
+		      ssh_port = 22
+
+		      # Identity Provider to determine the list of available hosts
+		      # options shipped are IPA, Json. Default is IPA
+		      idp = Json
+		      hosts_file = /etc/aker/hosts.json
+
+		      # FreeIPA hostgroup name contatining Aker gateways
+		      # to be excluded from hosts presented to user
+		      gateway_group = gateways
+		      ```
+		      
+	      * Edit /etc/aker/hosts.json to add users and hosts, a sample `hosts.json` file is provided .
+			
+	
 ### Contributing
 Currently I work on the code in my free time, any assistance is highly appreciated. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
