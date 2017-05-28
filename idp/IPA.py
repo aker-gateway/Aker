@@ -74,7 +74,6 @@ class IPA(IdP):
 		This function prints a list of all hosts. This function requires
 		one argument, the FreeIPA/IPA API object.
 		'''
-		#FIXME: make search hostgroup configurable instead of hardcoded
 		result = api.Command.host_find(not_in_hostgroup=self.gateway_hostgroup)['result']
 		members = []
 		for host in result:
@@ -95,57 +94,19 @@ class IPA(IdP):
 		hbacset = api.Command.hbacrule_find(sizelimit=sizelimit)['result']
 		for rule in hbacset:
 			ipa_rule = self.convert_to_ipa_rule(rule)
+			#Add only enabled rules
 			if ipa_rule.enabled:
-				rules.append(ipa_rule)		
+				rules.append(ipa_rule.name)		
 
-		for ipa_rule in rules:
-			for host in self._all_ssh_hosts:
-				request = pyhbac.HbacRequest()
-		
-				#Build request user/usergroups
-				try:
-					request.user.name = self.user
-					search_result = api.Command.user_show(request.user.name)['result']
-					groups = search_result['memberof_group']
-					if 'memberofindirect_group' in search_result:
-						groups += search_result['memberofindirect_group']
-					request.user.groups = sorted(set(groups))
-				except:
-					pass
-		
-				# Add sshd service + service groups it belongs to
-				try:
-					request.service.name = "sshd"
-					service_result = api.Command.hbacsvc_show(request.service.name)['result']
-					if 'memberof_hbacsvcgroup' in service_result:
-						request.service.groups = service_result['memberof_hbacsvcgroup']
-				except:
-					pass	
-				
-				# Build request host/hostgroups	
-				try:
-					request.targethost.name = host
-					tgthost_result = api.Command.host_show(request.targethost.name)['result']
-					groups = tgthost_result['memberof_hostgroup']
-					if 'memberofindirect_hostgroup' in tgthost_result:
-						groups += tgthost_result['memberofindirect_hostgroup']
-					request.targethost.groups = sorted(set(groups))                
-				except:
-					pass
-				try:
-					logging.debug("IPA: Checking %s", host)
-					res = request.evaluate([ipa_rule])
-					if res == pyhbac.HBAC_EVAL_ALLOW:	
-						logging.debug("IPA: ALLOWED_HOSTS %s", host)
-						self._allowed_ssh_hosts.append(host)
-				except pyhbac.HbacError as (code, rule_name):
-					if code == pyhbac.HBAC_EVAL_ERROR:
-						#TODO log error
-						print('Native IPA HBAC rule "%s" parsing error: %s' % \
-							(rule_name, pyhbac.hbac_result_string(code)))
-				except (TypeError, IOError) as (info):
-					print('Native IPA HBAC module error: %s' % (info))
-		
+		for host in self._all_ssh_hosts:
+			try:
+				logging.debug("IPA: Checking %s", host)
+				ret = api.Command.hbactest(user=self.user.decode('utf-8'),targethost=host,service=u"sshd",rules=rules)
+				if ret['value'] == True :
+					self._allowed_ssh_hosts.append(host)
+					logging.debug("IPA: ALLOWED_HOSTS %s", host)
+			except Exception as e:
+				logging.error("IPA: error evaluating HBAC : {0}".format(e.message))
 	
 	def list_allowed(self):
 		self._all_ssh_hosts = self._load_all_hosts(self.api)
