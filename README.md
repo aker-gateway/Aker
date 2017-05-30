@@ -14,7 +14,7 @@ I couldn't find an open source tool similar to [CryptoAuditor](https://www.ssh.c
 
 ### Current Featuers
 
-* Supports FreeIPA 4.2 , 4.3 (Optional)
+* Supports FreeIPA 4.2 , 4.3 and 4.4 (Optional)
 * Extensible, [Write Your Own Module](https://github.com/aker-gateway/Aker/wiki/IdP-Modules#writing-your-custom-idp-module)
 * Session Playback
 * Extract Session Commands
