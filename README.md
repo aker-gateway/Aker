@@ -79,10 +79,10 @@ Python Modules:
 		git clone https://github.com/aker-gateway/Aker.git /usr/bin/aker/
 		~~~
 		
-		* Install dependencies
+		* Install dependencies (adapt for Ubuntu)
 			~~~
-			yum install redis # redis-server for Ubunutu
-			pip install -r requirements.txt
+			yum -y install epel-release 
+			yum -y install python2-paramiko python-configparser python-redis python-urwid python2-wcwidth redis
 			~~~
 
 
@@ -105,6 +105,7 @@ Python Modules:
 	      ~~~
 
 		* Restart ssh
+		* Restart redis
 	
 	
 	
