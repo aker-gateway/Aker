@@ -72,17 +72,19 @@ class SSHClient(Client):
 		return transport
 
 	def start_session(self, user, auth_secret):
- 		logging.debug("SSHClient: Authenticating session")
   		try:
   			transport = self.get_transport()
   			if isinstance(auth_secret, basestring):
+				logging.debug("SSHClient: Authenticating using password")
  				transport.auth_password(user, auth_secret)
  			else:
  				try:
+					logging.debug("SSHClient: Authenticating using key-pair")
  					transport.auth_publickey(user, auth_secret)
  				# Failed to authenticate with SSH key, so
  				# try a password instead.
  				except paramiko.ssh_exception.AuthenticationException:
+					logging.debug("SSHClient: Authenticating using password")
  					transport.auth_password(user, getpass.getpass())
   			self._start_session(transport)
   		except Exception as e:
