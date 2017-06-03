@@ -19,6 +19,7 @@ import os
 import errno
 import time
 import fcntl
+import getpass
 
 
 TIME_OUT = 10
@@ -70,14 +71,22 @@ class SSHClient(Client):
 		transport.start_client()
 		return transport
 
-	def start_session(self, user, private_key):
-		logging.debug("SSHClient: Authenticating using key-pair")
-		try:
-			transport = self.get_transport()
-			transport.auth_publickey(user, private_key)
-			self._start_session(transport)
-		except Exception as e:
-			logging.error(e)
+	def start_session(self, user, auth_secret):
+ 		logging.debug("SSHClient: Authenticating session")
+  		try:
+  			transport = self.get_transport()
+  			if isinstance(auth_secret, basestring):
+ 				transport.auth_password(user, auth_secret)
+ 			else:
+ 				try:
+ 					transport.auth_publickey(user, auth_secret)
+ 				# Failed to authenticate with SSH key, so
+ 				# try a password instead.
+ 				except paramiko.ssh_exception.AuthenticationException:
+ 					transport.auth_password(user, getpass.getpass())
+  			self._start_session(transport)
+  		except Exception as e:
+  			logging.error("SSHClient:: error authenticating : {0} ".format(e.message))
 			self._session.close_session()
 			if transport:
 				transport.close()

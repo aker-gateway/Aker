@@ -12,6 +12,7 @@ import logging
 import signal
 import os
 import time
+import getpass
 from SSHClient import SSHClient
 
 class Session(object):
@@ -63,5 +64,13 @@ class SSHSession(Session):
 
 		
 	def start_session(self):
-		priv_key = self.aker.user.get_priv_key()
-		self._client.start_session(self.host_user,priv_key)
+		try:
+			auth_secret = self.aker.user.get_priv_key()
+		# currently, if no SSH public key exists, an ``Exception``
+		# is raised.  Catch it and try a password.
+		except Exception as exc:
+			if str(exc) == 'Core: Invalid Private Key':
+				auth_secret = getpass.getpass("Password: ")
+			else:
+				raise
+		self._client.start_session(self.host_user, auth_secret)
