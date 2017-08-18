@@ -35,7 +35,7 @@ class IPA(IdP):
 		except AttributeError:
 			api.Backend.xmlclient.connect() #FreeIPA < 4.0 compatibility
 		self.api = api
-		
+		self.default_ssh_port  = config.ssh_port
 		
 	def convert_to_ipa_rule(self,rule):
 		# convert a dict with a rule to an pyhbac rule
@@ -75,13 +75,13 @@ class IPA(IdP):
 		one argument, the FreeIPA/IPA API object.
 		'''
 		result = api.Command.host_find(not_in_hostgroup=self.gateway_hostgroup)['result']
-		members = []
-		for host in result:
-			hostname = host['fqdn']
-			if isinstance(hostname, (tuple, list)):
-				hostname = hostname[0]
-				members.append(hostname)
-			logging.debug("IPA: ALL_HOSTS %s", hostname)
+		members = {}
+		for ipa_host in result:
+			ipa_hostname = ipa_host['fqdn']
+			if isinstance(ipa_hostname, (tuple, list)):
+				ipa_hostname = ipa_hostname[0]
+			members[ipa_hostname] = {'fqdn': ipa_hostname}
+			logging.debug("IPA: ALL_HOSTS %s", ipa_hostname)
 
 		return members
 		
@@ -98,12 +98,17 @@ class IPA(IdP):
 			if ipa_rule.enabled:
 				rules.append(ipa_rule.name)		
 
-		for host in self._all_ssh_hosts:
+		for host,host_attributes in self._all_ssh_hosts.iteritems():
 			try:
-				logging.debug("IPA: Checking %s", host)
-				ret = api.Command.hbactest(user=self.user.decode('utf-8'),targethost=host,service=u"sshd",rules=rules)
+				hostname = host_attributes['fqdn']
+				logging.debug("IPA: Checking %s", hostname)
+				ret = api.Command.hbactest(user=self.user.decode('utf-8'),targethost=hostname,service=u"sshd",rules=rules)
 				if ret['value'] == True :
-					self._allowed_ssh_hosts.append(host)
+					result = api.Command.host_show(host_attributes['fqdn'])['result']
+					memberof_hostgroup = result['memberof_hostgroup']
+					#TODO: Add per-host ssh port checks
+					sshport = self.default_ssh_port
+					self._allowed_ssh_hosts[host] = {'fqdn' : hostname , 'ssh_port': sshport, 'hostgroups' : memberof_hostgroup }
 					logging.debug("IPA: ALLOWED_HOSTS %s", host)
 			except Exception as e:
 				logging.error("IPA: error evaluating HBAC : {0}".format(e.message))

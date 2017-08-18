@@ -45,10 +45,12 @@ class Window(object):
 	
 	def refresh_hosts(self,hosts):
 		body = []
-		for hostname in hosts:
-			host = MenuItem("%s" % (hostname))
-			urwid.connect_signal(host, 'connect', self.host_chosen, hostname) # host chosen action
-			body.append(urwid.AttrMap(host,'body', focus_map='SSH_focus'))
+		#for hostname in hosts:
+		for host in hosts.values():
+			# Use Host() FQDN as button text
+			host_menuitem = MenuItem("%s" % (host.fqdn))
+			urwid.connect_signal(host_menuitem, 'connect', self.host_chosen, host.fqdn) # host chosen action
+			body.append(urwid.AttrMap(host_menuitem,'body', focus_map='SSH_focus'))
 		return urwid.ListBox(urwid.SimpleFocusListWalker(body))
 	
 	def host_chosen(self,choice):

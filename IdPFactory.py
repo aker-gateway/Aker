@@ -42,8 +42,8 @@ class IdP(object):
 	'''
 
 	def __init__(self,username,gateway_hostgroup):
-		self._all_ssh_hosts = []
-		self._allowed_ssh_hosts = []
+		self._all_ssh_hosts = {}
+		self._allowed_ssh_hosts = {}
 		self.user = username
 		self.gateway_hostgroup = gateway_hostgroup
 	
