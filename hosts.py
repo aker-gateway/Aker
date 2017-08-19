@@ -15,7 +15,10 @@ from IdPFactory import IdPFactory
 
 class HostGroup(object):
 	"""
-
+	Class representing single hostgroup.A hostgroup 
+	holds a list of hosts/servers that are members of it.
+	Attributes
+	name: Hostgroup name
 	"""
 	
 	def __init__(self, name):
@@ -23,49 +26,21 @@ class HostGroup(object):
 		self.hosts = []
            
 	def __str__(self):
-		return "name:%s, hosts:%s" % (self.fqdn, self.ssh_port,list(self.hosts))
+		return "name:%s, hosts:%s" % (self.fqdn, self.ssh_port,self.hosts)
 		
 	def __iter__(self):
 		return self
 		
-	def add_host(hostname):
+	def add_host(self,hostname):
 		self.hosts.append(hostname)
 	
 		
-class HostGroups(object):
-	"""
-	Class representing hostgroups i.e. server groups,
-	 visible to a user
-	"""
-	
-	def __init__(self,user):
-		self.user = user
-		self.user_hostgroups = {}
-		
-	def create_hostgroup(self,hostgroup):
-		new_hostgroup = HostGroup(hostgroup)
-		self.user_hostgroups[new_hostgroup.name] = {}
-		
-	def add_host_to_hostgroups(self,host):
-		for group in host.hostgroups:
-			if group in self.user_hostgroups:
-				self.user_hostgroups[group]= json.dumps(vars(group)) 
-			else:
-				self.create_hostgroup(group)
-				self.user_hostgroups[group][host.fqdn]= json.dumps(vars(group))
-
-	def list(self):
-		return self.user_hostgroups
-						
-	def __iter__(self):
-		return self
-
 
 
 class Host(object):
 	"""
 	Class representing a single server entry, 
-	each Host/server has to be a membor of at least one 
+	each Host/server has to be a member one or more 
 	hostgroup. Servers have the following attributes :
 	
 	Attributes
@@ -86,7 +61,7 @@ class Host(object):
 			return False
             
 	def __str__(self):
-		return "fqdn:%s, ssh_port:%d, hostgroups:%s" % (self.fqdn, self.ssh_port,list(self.hostgroups))
+		return "fqdn:%s, ssh_port:%d, hostgroups:%s" % (self.fqdn, self.ssh_port,self.hostgroups)
 		
 	def __iter__(self):
 		return self
@@ -105,7 +80,7 @@ class Hosts(object):
 	def __init__(self,config,username,gateway_hostgroup,idp):
 		self._allowed_ssh_hosts = {}
 		self.user = username
-		self.hostgroups= HostGroups(self.user)
+		self._hostgroups= {}
 		# username is the redis key, well kinda 
 		self.hosts_cache_key  = self.user+":hosts"
 		self.hostgroups_cache_key  = self.user+":hostgroups"
@@ -129,13 +104,7 @@ class Hosts(object):
 		result = self.redis.hgetall(hkey)
 		cached = False
 		if result is not None:
-			try:
-				#Clear our list first
-				#del self._allowed_ssh_hosts[:]
-				
-				#Clear our dict first
-				self._allowed_ssh_hosts.clear()
-				
+			try:			
 				for k,v in result.iteritems():					
 					#Deserialize back from redis
 					hostentry= Host(json.loads(v)['fqdn'],json.loads(v)['hostgroups'])
@@ -157,7 +126,7 @@ class Hosts(object):
 		"""
 		# Delete existing cache if any
 		try:
-			self._del_cache_key(self.hosts_cache_key )
+			self._del_cache_key(self.hosts_cache_key)
 			logging.debug("Hosts: deleting hosts for user {0} from cache".format(self.user))
 		except Exception as e:
 			logging.error("Hosts: error deleting hosts from cache: {0}".format(e.message))		
@@ -172,10 +141,23 @@ class Hosts(object):
 			except Exception as e:
 				logging.error("Hosts: error saving to cache : {0}".format(e.message))
 		
-		for host in hosts.values():
+		
+	def _save_hostgroups_to_cache(self,hostgroups):
+		"""
+		hosts passed to this function should be a dict of HostGroup object		
+		"""
+		
+		# Delete existing cache if any
+		try:
+			self._del_cache_key(self.hostgroups_cache_key)
+			logging.debug("Hosts: deleting hostgroups for user {0} from cache".format(self.user))
+		except Exception as e:
+			logging.error("Hosts: error deleting hostgroups from cache: {0}".format(e.message))
+			
+		for hostgroup in hostgroups.values():
 			try:
-				for group in host.hostgroups:
-					logging.debug("DEBUG:: %s" % group)
+				logging.debug("Hosts: adding hostgroup {0} to cache".format(hostgroup.name))
+				self.redis.hset(self.hostgroups_cache_key ,hostgroup.name,json.dumps(vars(hostgroup)))
 			except Exception as e:
 				logging.error("Hosts: error saving to cache : {0}".format(e.message))
 		
@@ -196,6 +178,9 @@ class Hosts(object):
 		if from_cache:
 			# is redis up ?
 			if self.redis is not None :
+				#Clear our dicts first
+				self._allowed_ssh_hosts.clear()
+				self._hostgroups.clear()
 				cached = self._load_hosts_from_cache(self.hosts_cache_key )
 		
 		#backened cache has some entries for us?
@@ -205,8 +190,9 @@ class Hosts(object):
 
 		else:
 			
-			#Clear current hosts dict
+			#Clear current dicts
 			self._allowed_ssh_hosts.clear()
+			self._hostgroups.clear()
 			
 			#Passing the baton from the backend 
 			self._backend_hosts = self.idp.list_allowed()
@@ -215,9 +201,15 @@ class Hosts(object):
 			for backend_host,backend_host_attributes in self._backend_hosts.iteritems():
 				hostentry= Host(backend_host_attributes['fqdn'],backend_host_attributes['hostgroups'])
 				self._allowed_ssh_hosts[hostentry.fqdn] = hostentry
-				self.hostgroups.add_host_to_hostgroups(hostentry)
+				for group in hostentry.hostgroups:
+					if group not in self._hostgroups:
+						self._hostgroups[group] = HostGroup(group)
+						self._hostgroups[group].add_host(hostentry.fqdn)
+					else:
+						self._hostgroups[group].add_host(hostentry.fqdn)
 			if self.redis is not None :
 				self._save_hosts_to_cache(self._allowed_ssh_hosts)
+				self._save_hostgroups_to_cache(self._hostgroups)
 			return self._allowed_ssh_hosts
 
 
