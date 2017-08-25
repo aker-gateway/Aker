@@ -186,7 +186,7 @@ class Hosts(object):
 		#backened cache has some entries for us?
 		if cached is True :
 			logging.info("Hosts: loading hosts from cache")
-			return self._allowed_ssh_hosts
+			return self._allowed_ssh_hosts, self._hostgroups
 
 		else:
 			
@@ -210,7 +210,7 @@ class Hosts(object):
 			if self.redis is not None :
 				self._save_hosts_to_cache(self._allowed_ssh_hosts)
 				self._save_hostgroups_to_cache(self._hostgroups)
-			return self._allowed_ssh_hosts
+			return self._allowed_ssh_hosts, self._hostgroups
 
 
 

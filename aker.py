@@ -73,7 +73,8 @@ class User(object):
 		idp = config.get('idp')
 		logging.debug("Core: using Identity Provider {0}".format(idp))
 		self.hosts = Hosts(config,self.name,gateway_hostgroup,idp)
-		self.allowed_ssh_hosts = self.hosts.list_allowed()
+		self.allowed_ssh_hosts,self.hostgroups = self.hosts.list_allowed()
+		logging.debug("Core: user hostgroups are {0}".format(self.hostgroups))
 
 
 	def get_priv_key(self):
@@ -88,7 +89,7 @@ class User(object):
 
 	def refresh_allowed_hosts(self,fromcache):
 		logging.info("Core: reloading hosts for user {0} from backened identity provider".format(self.name))
-		self.allowed_ssh_hosts = self.hosts.list_allowed(from_cache=fromcache)
+		self.allowed_ssh_hosts,self.hostgroups = self.hosts.list_allowed(from_cache=fromcache)
 
 
 
