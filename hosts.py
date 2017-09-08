@@ -51,6 +51,7 @@ class Host(object):
 	
 	def __init__(self, name,memberof_hostgroups, ssh_port=22):
 		self.fqdn = name
+		self.name = name
 		self.ssh_port = ssh_port
 		self.hostgroups = memberof_hostgroups
    
@@ -109,6 +110,7 @@ class Hosts(object):
 					#Deserialize back from redis
 					hostentry= Host(json.loads(v)['fqdn'],json.loads(v)['hostgroups'])
 					self._allowed_ssh_hosts[hostentry.fqdn] = hostentry
+					logging.debug("Hosts: loading host {0} from cache".format(hostentry.fqdn))
 					cached = True
 			except Exception as e:
 				logging.error("Hosts: redis error: {0}".format(e.message))
@@ -141,7 +143,27 @@ class Hosts(object):
 			except Exception as e:
 				logging.error("Hosts: error saving to cache : {0}".format(e.message))
 		
+	def _load_hostgroups_from_cache(self, hkey):
 		
+		result = self.redis.hgetall(hkey)
+		cached = False
+		if result is not None:
+			try:			
+				for k,v in result.iteritems():					
+					#Deserialize back from redis
+					hostgroupentry= HostGroup(json.loads(v)['name'])
+					for host in json.loads(v)['hosts']:
+						hostgroupentry.add_host(host)
+					self._hostgroups[hostgroupentry.name] = hostgroupentry
+					cached = True
+			except Exception as e:
+				logging.error("Hostgroups: redis error: {0}".format(e.message))
+				cached = False 			
+		else:
+			logging.info("Hostgroups: no hostgroups loaded from cache for user %s" % self.user) 
+			cached = False
+		return cached 
+			
 	def _save_hostgroups_to_cache(self,hostgroups):
 		"""
 		hosts passed to this function should be a dict of HostGroup object		
@@ -171,28 +193,31 @@ class Hosts(object):
 			
 	
 	def list_allowed(self,from_cache=True):
+		"""
+		This function is the interface to the TUI
+		"""
 		
 		cached=False
+
+		#Clear our dicts first
+		self._allowed_ssh_hosts.clear()
+		self._hostgroups.clear()		
 		
 		#load from cache
 		if from_cache:
 			# is redis up ?
 			if self.redis is not None :
-				#Clear our dicts first
-				self._allowed_ssh_hosts.clear()
-				self._hostgroups.clear()
-				cached = self._load_hosts_from_cache(self.hosts_cache_key )
-		
+				cached = self._load_hosts_from_cache(self.hosts_cache_key)
+				#FIXME: using cached twice!, need better approach
+				cached = self._load_hostgroups_from_cache(self.hostgroups_cache_key)
+				
 		#backened cache has some entries for us?
 		if cached is True :
 			logging.info("Hosts: loading hosts from cache")
 			return self._allowed_ssh_hosts, self._hostgroups
-
+		
+		#No cached objects
 		else:
-			
-			#Clear current dicts
-			self._allowed_ssh_hosts.clear()
-			self._hostgroups.clear()
 			
 			#Passing the baton from the backend 
 			self._backend_hosts = self.idp.list_allowed()
@@ -201,12 +226,15 @@ class Hosts(object):
 			for backend_host,backend_host_attributes in self._backend_hosts.iteritems():
 				hostentry= Host(backend_host_attributes['fqdn'],backend_host_attributes['hostgroups'])
 				self._allowed_ssh_hosts[hostentry.fqdn] = hostentry
+				
+				#Build HostGroup() objects from items we got from backend
 				for group in hostentry.hostgroups:
 					if group not in self._hostgroups:
 						self._hostgroups[group] = HostGroup(group)
 						self._hostgroups[group].add_host(hostentry.fqdn)
 					else:
 						self._hostgroups[group].add_host(hostentry.fqdn)
+			#Save entries we got to the cache			
 			if self.redis is not None :
 				self._save_hosts_to_cache(self._allowed_ssh_hosts)
 				self._save_hostgroups_to_cache(self._hostgroups)

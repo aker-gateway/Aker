@@ -74,7 +74,7 @@ class User(object):
 		logging.debug("Core: using Identity Provider {0}".format(idp))
 		self.hosts = Hosts(config,self.name,gateway_hostgroup,idp)
 		self.allowed_ssh_hosts,self.hostgroups = self.hosts.list_allowed()
-		logging.debug("Core: user hostgroups are {0}".format(self.hostgroups))
+
 
 
 	def get_priv_key(self):
@@ -142,7 +142,7 @@ class Aker(object):
 		finally:
 			session.stop_sniffer()
 			self.tui.restore()
-			self.tui.search_edit.set_edit_text("") # Clear selected hosts
+			#self.tui.search_edit.set_edit_text("") # Clear selected hosts
 
 
 	def session_end_callback(self, session):
