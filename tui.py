@@ -99,19 +99,19 @@ class Header(urwid.Columns):
 		self.header_widget = urwid.Text(self.text, align='left')
 		self.popup = SimplePopupLauncher()
 		self.popup_padding = urwid.Padding(self.popup, 'right', 20)
-		self._widget_list=[
-				('pack',urwid.AttrMap(self.header_widget, 'head')),
-				('pack',urwid.AttrMap(self.popup_padding, 'indicator'))]
-		super(Header, self).__init__(self._widget_list)
+		self.popup_map = urwid.AttrMap(self.popup_padding, 'indicator')
+		self.header_map = urwid.AttrMap(self.header_widget, 'head')
+		super(Header, self).__init__([self.header_map, self.popup_map])
 
 				
 	def popup_message(self, message):
 		logging.debug("DEBUG: popup message is {0}".format(message))
 		self.popup.message = str(message)	
 		self.popup.open_pop_up()
-        
+
+
 class Footer(urwid.AttrMap):
-    def __init__(self,text):
+	def __init__(self,text):
 		self.footer_text = urwid.Text(text, align='center')
 		super(Footer, self).__init__(self.footer_text, 'foot')
 		
@@ -176,18 +176,18 @@ class Window(object):
 			('key', "%s" % self.user.name), " "]
 		
 		self.footer_text = [
-            ('msg', "Move:"),
-            ('key', "Up"), ",", ('key', "Down"), ",",
-            ('key', "PgUp"), ",",
-            ('key', "PgDn"), ",",
-            ('msg', "Select:"),
-            ('key', "Enter"), " ",
-            ('msg', "Refresh:"),
-            ('key', "F5"), " ",
-            ('msg', "Quit:"),
-            ('key', "F9"), " ",
-            ('msg', "By:"),
-            ('key', "Ahmed Nazmy")]
+			('msg', "Move:"),
+			('key', "Up"), ",", ('key', "Down"), ",",
+			('key', "PgUp"), ",",
+			('key', "PgDn"), ",",
+			('msg', "Select:"),
+			('key', "Enter"), " ",
+			('msg', "Refresh:"),
+			('key', "F5"), " ",
+			('msg', "Quit:"),
+			('key', "F9"), " ",
+			('msg', "By:"),
+			('key', "Ahmed Nazmy")]
 		
 		#Define widgets
 		self.header= Header(self.header_text)
