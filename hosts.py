@@ -166,7 +166,7 @@ class Hosts(object):
 			
 	def _save_hostgroups_to_cache(self,hostgroups):
 		"""
-		hosts passed to this function should be a dict of HostGroup object		
+		hosts passed to this function should be a dict of HostGroup object
 		"""
 		
 		# Delete existing cache if any
@@ -222,7 +222,7 @@ class Hosts(object):
 			#Passing the baton from the backend 
 			self._backend_hosts = self.idp.list_allowed()
 			
-			#Build Host objects out of items we got from backend
+			#Build Host() objects out of items we got from backend
 			for backend_host,backend_host_attributes in self._backend_hosts.iteritems():
 				hostentry= Host(backend_host_attributes['fqdn'],backend_host_attributes['hostgroups'])
 				self._allowed_ssh_hosts[hostentry.fqdn] = hostentry

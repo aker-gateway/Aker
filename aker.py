@@ -142,7 +142,7 @@ class Aker(object):
 		finally:
 			session.stop_sniffer()
 			self.tui.restore()
-			#self.tui.search_edit.set_edit_text("") # Clear selected hosts
+			self.tui.hostlist.search.clear() # Clear selected hosts
 
 
 	def session_end_callback(self, session):
