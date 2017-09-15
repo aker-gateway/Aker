@@ -26,7 +26,6 @@ class Json(IdP):
     def _init_json_config(self):
         # Load the configration from the already intitialised config parser
         hosts_file = self.config.get("General", "hosts_file", "hosts.json")
-
         try:
             JSON = json.load(open(hosts_file, 'r'))
         except ValueError as e:
