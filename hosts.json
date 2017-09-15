@@ -1,17 +1,17 @@
 {
-	"groups": [
+	"usergroups": [
 		"lnxadmins",
 		"dbadmins"
 	],
 	"users": [{
 			"username": "anazmy",
 			"keyfile": "~/.ssh/id_rsa",
-			"groups": ["lnxadmins"]
+			"usergroups": ["lnxadmins"]
 		},
 		{
 			"username": "jsmith",
 			"keyfile": "~/.ssh/id_rsa",
-			"groups": ["dbadmins"]
+			"usergroups": ["dbadmins"]
 		}
 	],
 	"hosts": [{
@@ -19,8 +19,11 @@
 			"hostname": "web1.ipa.example",
 			"port": "22",
 			"key": "~/.ssh/id_rsa",
-			"groups": [
+			"usergroups": [
 				"lnxadmins"
+			],
+			"hostgroups": [
+				"linuxservers"
 			]
 		},
 		{
@@ -28,8 +31,11 @@
 			"hostname": "web2.ipa.example",
 			"port": "22",
 			"key": "~/.ssh/id_rsa",
-			"groups": [
+			"usergroups": [
 				"lnxadmins"
+			],
+			"hostgroups": [
+				"linuxservers"
 			]
 		},
 		{
@@ -37,9 +43,13 @@
 			"hostname": "db1.ipa.example",
 			"port": "22",
 			"key": "~/.ssh/id_rsa",
-			"groups": [
+			"usergroups": [
 				"lnxadmins",
 				"dbadmins"
+			],
+			"hostgroups": [
+				"linuxservers",
+				"dbservers"
 			]
 		},
 		{
@@ -47,9 +57,13 @@
 			"hostname": "db2.ipa.example",
 			"port": "22",
 			"key": "~/.ssh/id_rsa",
-			"groups": [
+			"usergroups": [
 				"lnxadmins",
 				"dbadmins"
+			],
+			"hostgroups": [
+				"linuxservers",
+				"dbservers"
 			]
 		}
 	]
