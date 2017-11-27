@@ -8,11 +8,8 @@ __license__ = "AGPLv3"
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
-import urwid
-import aker
-import signal
 import logging
-import os
+import urwid
 from popup import SimplePopupLauncher
 
 
@@ -199,7 +196,7 @@ class Window(object):
 
         self.footer_text = [
             ('msg', "Move:"),
-            ('key', "Up"), ",", 
+            ('key', "Up"), ",",
             ('key', "Down"), ",",
             ('key', "Left"), ",",
             ('key', "PgUp"), ",",
