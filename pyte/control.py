@@ -13,7 +13,7 @@
     :license: LGPL, see LICENSE for more details.
 """
 
-#: *Space*: Not suprisingly -- ``" "``.
+#: *Space*: Not surprisingly -- ``" "``.
 SP = b" "
 
 #: *Null*: Does nothing.
@@ -22,7 +22,7 @@ NUL = b"\x00"
 #: *Bell*: Beeps.
 BEL = b"\x07"
 
-#: *Backspace*: Backspace one column, but not past the begining of the
+#: *Backspace*: Backspace one column, but not past the beginning of the
 #: line.
 BS = b"\x08"
 

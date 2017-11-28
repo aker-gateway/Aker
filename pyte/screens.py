@@ -495,7 +495,7 @@ class Screen(object):
                          1] = self.cursor.attrs._replace(data=" ")
             elif char_width == 0 and unicodedata.combining(char):
                 # A zero-cell character is combined with the previous
-                # character either on this or preceeding line.
+                # character either on this or preceding line.
                 if self.cursor.x:
                     last = line[self.cursor.x - 1]
                     normalized = unicodedata.normalize("NFC", last.data + char)
