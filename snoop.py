@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-#
-#	   Copyright 2016 Ahmed Nazmy
-#
+"""
+Copyright 2016 Ahmed Nazmy
+"""
 
 # Meta
 __license__ = "AGPLv3"
@@ -67,7 +67,7 @@ class Sniffer(object):
             output = "".join(
                 [l for l in self.screen.display if len(l.strip()) > 0]).strip()
             # for line in reversed(self.screen.buffer):
-            #output = "".join(map(operator.attrgetter("data"), line)).strip()
+            #     output = "".join(map(operator.attrgetter("data"), line)).strip()
             logging.debug("output is %s" % output)
             command = self.ps1_parser(output)
         except Exception as e:

@@ -79,7 +79,7 @@ def replay(log_file, time_file):
                 logf.readline()  # ignore first line, (Session Start)
                 for t in timing:
                     data = logf.read(t[1])
-                    #print("data is %s , t is %s" % (data,t[1]))
+                    # print("data is %s , t is %s" % (data,t[1]))
                     text = codecs.decode(data, 'UTF-8', "replace")
                     time.sleep(t[0])
                     sys.stdout.write(text)
