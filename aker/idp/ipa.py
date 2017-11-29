@@ -7,26 +7,26 @@
 # Meta
 
 
-from IdPFactory import IdP
 import logging
 import pyhbac
+
+from ipalib import _, ngettext
 from ipalib import api, errors, output, util
 from ipalib import Command, Str, Flag, Int
 from ipalib.cli import to_cli
-from ipalib import _, ngettext
-from ipapython.dn import DN
 from ipalib.plugable import Registry
+from ipapython.dn import DN
+
+from ..idp_factory import IdP
 
 
-class IPA(IdP):
-    '''
-    Abstract represtation of user allowed hosts.
-    Currently relying on FreeIPA API
-    '''
+class Ipa(IdP):
+    """Abstract represtation of user allowed hosts.
+    Currently relying on FreeIPA API"""
 
     def __init__(self, config, username, gateway_hostgroup):
-        super(IPA, self).__init__(username, gateway_hostgroup)
-        logging.info("IPA: loaded")
+        super(Ipa, self).__init__(username, gateway_hostgroup)
+        logging.info('IPA: loaded')
         api.bootstrap(context='cli')
         api.finalize()
         try:
@@ -36,17 +36,23 @@ class IPA(IdP):
         self.api = api
         self.default_ssh_port = config.ssh_port
 
-    def convert_to_ipa_rule(self, rule):
+    def list_allowed(self):
+        self._all_ssh_hosts = self._load_all_hosts()
+        self._load_user_allowed_hosts()
+        return self._allowed_ssh_hosts
+
+    @staticmethod
+    def convert_to_ipa_rule(rule):
         # convert a dict with a rule to an pyhbac rule
         ipa_rule = pyhbac.HbacRule(rule['cn'][0])
         ipa_rule.enabled = rule['ipaenabledflag'][0]
         # Following code attempts to process rule systematically
-        structure = \
-            (('user', 'memberuser', 'user', 'group', ipa_rule.users),
-             ('host', 'memberhost', 'host', 'hostgroup', ipa_rule.targethosts),
-                ('sourcehost', 'sourcehost', 'host', 'hostgroup', ipa_rule.srchosts),
-                ('service', 'memberservice', 'hbacsvc', 'hbacsvcgroup', ipa_rule.services),
-             )
+        structure = (
+            ('user', 'memberuser', 'user', 'group', ipa_rule.users),
+            ('host', 'memberhost', 'host', 'hostgroup', ipa_rule.targethosts),
+            ('sourcehost', 'sourcehost', 'host', 'hostgroup', ipa_rule.srchosts),
+            ('service', 'memberservice', 'hbacsvc', 'hbacsvcgroup', ipa_rule.services),
+        )
         for element in structure:
             category = '%scategory' % (element[0])
             if (category in rule and rule[category][0] == u'all') or (
@@ -69,12 +75,10 @@ class IPA(IdP):
                 rule['externalhost'])  # pylint: disable=E1101
         return ipa_rule
 
-    def _load_all_hosts(self, api):
-        '''
-        This function prints a list of all hosts. This function requires
-        one argument, the FreeIPA/IPA API object.
-        '''
-        result = api.Command.host_find(
+    def _load_all_hosts(self):
+        """This function prints a list of all hosts. This function requires
+        one argument, the FreeIPA/IPA API object"""
+        result = self.api.Command.host_find(
             not_in_hostgroup=self.gateway_hostgroup)['result']
         members = {}
         for ipa_host in result:
@@ -82,12 +86,12 @@ class IPA(IdP):
             if isinstance(ipa_hostname, (tuple, list)):
                 ipa_hostname = ipa_hostname[0]
             members[ipa_hostname] = {'fqdn': ipa_hostname}
-            logging.debug("IPA: ALL_HOSTS %s", ipa_hostname)
+            logging.debug('IPA: ALL_HOSTS %s', ipa_hostname)
 
         return members
 
     def _load_user_allowed_hosts(self):
-        self._all_ssh_hosts = self._load_all_hosts(self.api)
+        self._all_ssh_hosts = self._load_all_hosts()
         hbacset = []
         rules = []
         sizelimit = None
@@ -101,11 +105,11 @@ class IPA(IdP):
         for host, host_attributes in self._all_ssh_hosts.iteritems():
             try:
                 hostname = host_attributes['fqdn']
-                logging.debug("IPA: Checking %s", hostname)
+                logging.debug('IPA: Checking %s', hostname)
                 ret = api.Command.hbactest(
                     user=self.user.decode('utf-8'),
                     targethost=hostname,
-                    service=u"sshd",
+                    service=u'sshd',
                     rules=rules)
                 if ret['value']:
                     result = api.Command.host_show(
@@ -114,14 +118,10 @@ class IPA(IdP):
                     # TODO: Add per-host ssh port checks
                     sshport = self.default_ssh_port
                     self._allowed_ssh_hosts[host] = {
-                        'fqdn': hostname, 'ssh_port': sshport, 'hostgroups': memberof_hostgroup}
-                    logging.debug("IPA: ALLOWED_HOSTS %s", host)
-            except Exception as e:
-                logging.error(
-                    "IPA: error evaluating HBAC : {0}".format(
-                        e.message))
-
-    def list_allowed(self):
-        self._all_ssh_hosts = self._load_all_hosts(self.api)
-        self._load_user_allowed_hosts()
-        return self._allowed_ssh_hosts
+                        'fqdn': hostname,
+                        'hostgroups': memberof_hostgroup,
+                        'ssh_port': sshport,
+                    }
+                    logging.debug('IPA: ALLOWED_HOSTS %s', host)
+            except Exception as exc:
+                logging.error('IPA: error evaluating HBAC : %s', exc.message)

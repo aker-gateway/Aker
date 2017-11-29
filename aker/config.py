@@ -8,7 +8,7 @@ from uuid import uuid1
 class Config(object):
     """Configuration object"""
 
-    def __init__(self, filename, log_file='', log_level='', session_log_dir=''):
+    def __init__(self, filename, hosts_file='', idp='', log_file='', log_level='', session_log_dir=''):
         remote_connection = os.environ.get('SSH_CLIENT', '0.0.0.0 0').split()
         self.src_ip = remote_connection[0]
         self.src_port = remote_connection[1]
@@ -19,6 +19,8 @@ class Config(object):
         if filename:
             self.parser.read(filename)
 
+            self.hosts_file = hosts_file or self.parser.get('General', 'hosts_file')
+            self.idp = idp or self.parser.get('General', 'idp')
             self.log_file = log_file or self.parser.get('General', 'log_file')
             self.log_level = log_level or self.parser.get('General', 'log_level')
             self.session_log_dir = session_log_dir or self.parser.get('General', 'session_log_dir')
@@ -29,7 +31,7 @@ class Config(object):
         if len(args) == 3:
             try:
                 return self.parser.get(args[0], args[1])
-            except NoOptionError as exc:
+            except NoOptionError:
                 return args[2]
         if len(args) == 2:
             return self.parser.get(args[0], args[1])
