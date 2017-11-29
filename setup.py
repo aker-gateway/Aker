@@ -26,8 +26,8 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'aker = aker.aker'
-            'akerctl = aker.akerctl'
+            'aker = aker.cli.aker:run',
+            'akerctl = aker.cli.akerctl:run',
         ]
     },
     classifiers=[
