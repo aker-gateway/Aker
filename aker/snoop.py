@@ -122,7 +122,7 @@ class Sniffer(object):
         except IOError as exc:
             logging.debug('Sniffer: set_logs IO error %s', exc.message)
 
-        log_file.write('Session Start %s\r\n', self.session_date_time)
+        log_file.write('Session Start {0}\r\n'.format(self.session_date_time))
         self.log_file = log_file
         self.log_timer = log_timer
         self.log_cmds = log_cmds
@@ -147,7 +147,7 @@ class Sniffer(object):
         except Exception as exc:
             logging.error('Sniffer: close session files error %s', exc.message)
 
-        self.log_file.write('Session End %s', session_end)
+        self.log_file.write('Session End {0}'.format(session_end))
         self.log_file.close()
         self.log_timer.close()
 
@@ -171,7 +171,7 @@ class SSHSniffer(Sniffer):
     def channel_filter(self, data):
         now_timestamp = time.time()
         # Write delta time and number of chrs to timer log
-        self.log_timer.write('%s %s\n', (round(now_timestamp - self.before_timestamp, 4), len(data)))
+        self.log_timer.write('{0} {1}\n'.format(round(now_timestamp - self.before_timestamp, 4), len(data)))
         self.log_timer.flush()
         self.log_file.write(data)
         self.log_file.flush()

@@ -4,23 +4,22 @@
 #
 
 # Meta
-__license__ = "AGPLv3"
+__license__ = 'AGPLv3'
 __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
-import logging
-import paramiko
-import socket
-import tty
-import sys
-import termios
-import signal
-import select
-import os
 import errno
-import time
 import fcntl
 import getpass
+import logging
+import os
+import select
+import signal
+import socket
+import sys
+import termios
+import tty
 
+import paramiko
 
 TIME_OUT = 10
 
@@ -48,7 +47,7 @@ class Client(object):
                 termios.TIOCGWINSZ,
                 buffer)
             columns, lines = struct.unpack(fmt, result)
-        except Exception as e:
+        except Exception as exc:
             pass
         finally:
             return columns, lines
@@ -59,14 +58,14 @@ class SSHClient(Client):
         super(SSHClient, self).__init__(session)
         self._socket = None
         self.channel = None
-        logging.debug("Client: Client Created")
+        logging.debug('Client: Client Created')
 
     def connect(self, ip, port, size):
         self._size = size
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.settimeout(TIME_OUT)
         self._socket.connect((ip, port))
-        logging.debug("SSHClient: Connected to {0}:{1}".format(ip, port))
+        logging.debug('SSHClient: Connected to %s:%s', ip, port)
 
     def get_transport(self):
         transport = paramiko.Transport(self._socket)
@@ -78,32 +77,28 @@ class SSHClient(Client):
         try:
             transport = self.get_transport()
             if isinstance(auth_secret, basestring):
-                logging.debug("SSHClient: Authenticating using password")
+                logging.debug('SSHClient: Authenticating using password')
                 transport.auth_password(user, auth_secret)
             else:
                 try:
-                    logging.debug("SSHClient: Authenticating using key-pair")
+                    logging.debug('SSHClient: Authenticating using key-pair')
                     transport.auth_publickey(user, auth_secret)
                 # Failed to authenticate with SSH key, so
                 # try a password instead.
                 except paramiko.ssh_exception.AuthenticationException:
-                    logging.debug("SSHClient: Authenticating using password")
+                    logging.debug('SSHClient: Authenticating using password')
                     transport.auth_password(user, getpass.getpass())
             self._start_session(transport)
-        except Exception as e:
-            logging.error(
-                "SSHClient:: error authenticating : {0} ".format(
-                    e.message))
+        except Exception as exc:
+            logging.error('SSHClient: error authenticating: %s', exc.message)
             self._session.close_session()
             if transport:
                 transport.close()
             self._socket.close()
-            raise e
+            raise exc
 
     def attach(self, sniffer):
-        """
-        Adds a sniffer to the session
-        """
+        """Adds a sniffer to the session"""
         self.sniffers.append(sniffer)
 
     def _set_sniffer_logs(self):
@@ -133,16 +128,14 @@ class SSHClient(Client):
     def sigwinch(self, signal, data):
         columns, lines = get_console_dimensions()
         logging.debug(
-            "SSHClient: setting terminal to %s columns and %s lines" %
+            'SSHClient: setting terminal to %s columns and %s lines' %
             (columns, lines))
         self.channel.resize_pty(columns, lines)
         for sniffer in self.sniffers:
             sniffer.sigwinch(columns, lines)
 
     def interactive_shell(self, chan):
-        """
-        Handles ssh IO
-        """
+        """Handles ssh IO"""
         sys.stdout.flush()
         oldtty = termios.tcgetattr(sys.stdin)
         try:
@@ -158,8 +151,8 @@ class SSHClient(Client):
                         sys.stdin.fileno(),
                         fcntl.F_SETFL,
                         flag | os.O_NONBLOCK)
-                except Exception as e:
-                    logging.error(e)
+                except Exception as exc:
+                    logging.error(exc)
                     pass
 
                 if chan in r:
@@ -173,7 +166,7 @@ class SSHClient(Client):
                         try:
                             nbytes = os.write(sys.stdout.fileno(), x)
                             logging.debug(
-                                "SSHClient: wrote %s bytes to stdout" % nbytes)
+                                'SSHClient: wrote %s bytes to stdout' % nbytes)
                             sys.stdout.flush()
                         except OSError as msg:
                             if msg.errno == errno.EAGAIN:
@@ -184,8 +177,8 @@ class SSHClient(Client):
                 if sys.stdin in r:
                     try:
                         buf = os.read(sys.stdin.fileno(), 4096)
-                    except OSError as e:
-                        logging.error(e)
+                    except OSError as exc:
+                        logging.error(exc)
                         pass
                     for sniffer in self.sniffers:
                         sniffer.stdin_filter(buf)
@@ -193,5 +186,5 @@ class SSHClient(Client):
                     chan.send(buf)
 
         finally:
-            logging.debug("SSHClient: interactive session ending")
+            logging.debug('SSHClient: interactive session ending')
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)

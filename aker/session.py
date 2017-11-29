@@ -57,9 +57,7 @@ class Session(object):
 
 
 class SSHSession(Session):
-    """ Wrapper around SSHClient instantiating
-            a new SSHClient instance every time
-    """
+    """Wrapper around SSHClient instantiating a new SSHClient instance every time"""
 
     def create_client(self):
         client = SSHClient(self)

@@ -83,17 +83,21 @@ def main(args, config):
 if __name__ == '__main__':
     PARSER = ArgumentParser(description='Aker session replay')
     PARSER.add_argument('--config', '-c', default='/etc/aker/aker.ini', help='Path to config file')
+    PARSER.add_argument('--log-file', default='/var/log/aker/aker.log', help='Path to log file')
+    PARSER.add_argument('--log-level', default='INFO', help='Set log level', choices=('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', 'FATAL'))
     PARSER.add_argument('--session-log-dir', default='/var/log/aker', help='Session log dir')
-    PARSER.add_argument('--uuid', '-u', action='store', help='Recorded Session UUID', required=True)
+    PARSER.add_argument('--uuid', action='store', help='Recorded Session UUID', required=True)
 
     GROUP = PARSER.add_mutually_exclusive_group(required=True)
-    GROUP.add_argument('--replay', '-r', action='store_true', help='Replay Session')
-    GROUP.add_argument('--commands', '-c', action='store_true', help='Print Commands Entered By User During Session')
+    GROUP.add_argument('--replay', action='store_true', help='Replay Session')
+    GROUP.add_argument('--commands', action='store_true', help='Print Commands Entered By User During Session')
 
     ARGS = PARSER.parse_args()
 
     CONFIG = Config(
         filename=ARGS.config,
+        log_file=ARGS.log_file,
+        log_level=ARGS.log_level,
         session_log_dir=ARGS.session_log_dir,
     )
 

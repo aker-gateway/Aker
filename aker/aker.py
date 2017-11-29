@@ -104,6 +104,9 @@ class Aker(object):
         session.connect(screen_size)
         try:
             session.start_session()
+        except Exception as exc:
+            logging.error('Core: start_session failed: %s', exc.message)
+            raise
         finally:
             session.stop_sniffer()
             self.tui.restore()
