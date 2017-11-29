@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #       Copyright 2017 Ahmed Nazmy
@@ -53,9 +52,8 @@ class Json(IdP):
                 for host in self._all_ssh_hosts:
                     for usergroup in host.get('usergroups'):
                         if usergroup in self._user_groups:
-                            self._allowed_ssh_hosts[
-                                host.get('name')] = {
-                                    'fqdn': host.get('name'),
-                                    'hostgroups': host.get('hostgroups'),
-                                    'ssh_port': host.get('port'),
-                                }
+                            self._allowed_ssh_hosts[host.get('name')] = {
+                                'fqdn': host.get('name'),
+                                'hostgroups': host.get('hostgroups'),
+                                'ssh_port': host.get('port'),
+                            }
