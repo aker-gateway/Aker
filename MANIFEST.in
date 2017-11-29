@@ -1,0 +1,3 @@
+include aker/aker.ini
+include README.md
+include requirements.txt

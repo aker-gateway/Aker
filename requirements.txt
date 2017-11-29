@@ -1,5 +1,6 @@
 configparser
-urwid
 paramiko
+pyte==0.7.0
 redis
+urwid
 wcwidth

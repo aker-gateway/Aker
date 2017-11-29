@@ -7,22 +7,22 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.eggs/
+.installed.cfg
 .Python
-env/
+*.egg
+*.egg-info/
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
-.eggs/
+env/
 lib/
 lib64/
 parts/
 sdist/
 var/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -35,15 +35,15 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
-htmlcov/
-.tox/
+.cache
 .coverage
 .coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
 .hypothesis/
+.tox/
+*,cover
+coverage.xml
+htmlcov/
+nosetests.xml
 
 # Translations
 *.mo
@@ -79,13 +79,13 @@ celerybeat-schedule
 .env
 
 # virtualenv
-venv/
-ENV/
-local/
-include/
 bin/
+ENV/
+include/
+local/
+venv/
 
-# sublime 
+# sublime
 *.sublime-*
 
 
@@ -96,4 +96,3 @@ bin/
 .ropeproject
 
 .idea
-
