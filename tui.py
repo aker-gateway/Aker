@@ -296,7 +296,7 @@ class Window(object):
                     "TUI: host {1} matches search text {0}".format(
                         search_text, host))
                 matchinghosts.append(host)
-        self.hostlist.updatelist(matchinghosts)
+        self.hostlist.updatelist(sorted(matchinghosts))
 
     def group_chosen_handler(self, hostgroup):
         logging.debug(
@@ -310,7 +310,7 @@ class Window(object):
                 "TUI: host {1} is in hostgroup {0}, adding".format(
                     hostgroup, host))
             matchinghosts.append(host)
-        self.hostlist.updatelist(matchinghosts)
+        self.hostlist.updatelist(sorted(matchinghosts))
         header_text = [
             ('key', "Aker"), " ",
             ('msg', "User:"),
