@@ -29,12 +29,18 @@ import paramiko
 import socket
 from configparser import ConfigParser, NoOptionError
 import time
+import signal
+import sys
 
 from hosts import Hosts
 import tui
 from session import SSHSession
 from snoop import SSHSniffer
 
+def signal_handler(signal, frame):
+        logging.debug("Core: user tried an invalid signal {}".format(signal))
+# Capture CTRL-C
+signal.signal(signal.SIGINT, signal_handler)
 
 config_file = "/etc/aker/aker.ini"
 log_file = '/var/log/aker/aker.log'
