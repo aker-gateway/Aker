@@ -69,15 +69,18 @@ class HostList(Listing):
         super(HostList, self).__init__(hosts)
 
     def keypress(self, size, key):
-        if key == 'enter':
+        if (key == 'enter') or (key == 'right'):
             urwid.emit_signal(
                 self,
                 'connect',
                 self.focus.original_widget.get_caption())
             key = None
         elif key == 'esc':
-            self.search.clear()
-            key = None
+            if self.search.get_edit_text() == "":
+                key = 'left'
+            else:
+                self.search.clear()
+                key = None
         # Unless its arrow keys send keypress to search box,
         # implies emitting EditBox "change" signal
         elif key not in ['right', 'down', 'up', 'left', 'page up', 'page down']:
@@ -95,7 +98,7 @@ class HostGroupList(Listing):
         super(HostGroupList, self).__init__(hostgroups)
 
     def keypress(self, size, key):
-        if key == 'enter':
+        if (key == 'enter') or (key == 'right'):
             # emit signal to call hostgroup_chosen_handler with MenuItem caption,
             # caption is group name showing on screen
             urwid.emit_signal(
@@ -199,9 +202,10 @@ class Window(object):
 
         self.footer_text = [
             ('msg', "Move:"),
-            ('key', "Up"), ",", 
+            ('key', "Up"), ",",
             ('key', "Down"), ",",
             ('key', "Left"), ",",
+            ('key', "Right"), ",",
             ('key', "PgUp"), ",",
             ('key', "PgDn"), ",",
             ('msg', "Select:"),
