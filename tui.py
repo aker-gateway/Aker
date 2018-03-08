@@ -70,10 +70,11 @@ class HostList(Listing):
 
     def keypress(self, size, key):
         if key == 'enter':
-            urwid.emit_signal(
-                self,
-                'connect',
-                self.focus.original_widget.get_caption())
+            if self.focus is not None:
+                urwid.emit_signal(
+                    self,
+                    'connect',
+                    self.focus.original_widget.get_caption())
             key = None
         elif key == 'esc':
             self.search.clear()
@@ -98,10 +99,11 @@ class HostGroupList(Listing):
         if key == 'enter':
             # emit signal to call hostgroup_chosen_handler with MenuItem caption,
             # caption is group name showing on screen
-            urwid.emit_signal(
-                self,
-                'group_chosen',
-                self.focus.original_widget.get_caption())
+            if self.focus is not None:
+                urwid.emit_signal(
+                    self,
+                    'group_chosen',
+                    self.focus.original_widget.get_caption())
             key = None
         elif key == 'esc':
             self.search.clear()
