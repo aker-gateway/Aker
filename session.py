@@ -70,4 +70,7 @@ class SSHSession(Session):
                 auth_secret = getpass.getpass("Password: ")
             else:
                 raise
-        self._client.start_session(self.host_user, auth_secret)
+        try:
+            self._client.start_session(self.host_user, auth_secret)
+        except:
+            logging.debug("Session: SSHSession failed")
