@@ -33,8 +33,12 @@ class Json(IdP):
                 "JSON: could not read json file {0} , error : {1}".format(
                     hosts_file, e.message))
 
+        logging.debug("Json: loading all hosts from {0}".format(hosts_file))
         self._all_ssh_hosts = JSON["hosts"]
+        logging.debug("Json: loading all users from {0}".format(hosts_file))
         self._all_users = JSON.get("users")
+        logging.debug(
+            "Json: loading all usergroups from {0}".format(hosts_file))
         self._all_usergroups = JSON.get("usergroups")
         self._allowed_ssh_hosts = {}
         self._load_user_allowed_hosts()
@@ -45,15 +49,20 @@ class Json(IdP):
         """
         for user in self._all_users:
             if user.get("username") == self.posix_user:
+                logging.debug("Json: loading hosts/groups for user {0}".format(
+                    self.posix_user))
                 self._user_groups = user.get("usergroups")
                 for host in self._all_ssh_hosts:
                     for usergroup in host.get("usergroups"):
                         if usergroup in self._user_groups:
-                            self._allowed_ssh_hosts[
-                                host.get("name")] = {
+                            logging.debug(
+                                "Json: loading host {0} for user {1}".format(
+                                    host.get("name"), self.posix_user))
+                            self._allowed_ssh_hosts[host.get("name")] = {
                                 'fqdn': host.get("name"),
                                 'ssh_port': host.get("port"),
-                                'hostgroups': host.get("hostgroups")}
+                                'hostgroups': host.get("hostgroups")
+                            }
 
     def list_allowed(self):
         # is our list empty ?
