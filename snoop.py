@@ -161,9 +161,12 @@ class Sniffer(object):
                 "Sniffer: close session files error {0} ".format(
                     e.message))
 
-        self.log_file.write('Session End %s' % session_end)
-        self.log_file.close()
-        self.log_timer.close()
+        try:
+            self.log_file.write('Session End %s' % session_end)
+            self.log_file.close()
+            self.log_timer.close()
+        except:
+            logging.debug("Sniffer: Failed to close files. Likely due to a session close before establishing.")
 
 
 class SSHSniffer(Sniffer):
