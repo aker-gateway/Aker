@@ -96,6 +96,8 @@ Python Modules:
 	      ```
 	      mkdir /var/log/aker
 	      chmod 777 /var/log/aker
+	      touch /var/log/aker/aker.log
+	      chmod 777 /var/log/aker/aker.log
 	      ```
 
 		* Enforce aker on all users but root, edit sshd_config
