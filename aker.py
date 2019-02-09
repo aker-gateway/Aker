@@ -7,8 +7,8 @@
 
 
 # Meta
-__version__ = '0.4.4'
-__version_info__ = (0, 4, 4)
+__version__ = '0.4.5'
+__version_info__ = (0, 4, 5)
 __license__ = "AGPLv3"
 __license_info__ = {
     "AGPLv3": {
