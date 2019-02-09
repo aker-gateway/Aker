@@ -65,8 +65,9 @@ class SSHClient(Client):
         self._size = size
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.settimeout(TIME_OUT)
+        logging.debug("SSHClient: Connecting to {0}:{1}".format(ip, port))
         self._socket.connect((ip, port))
-        logging.debug("SSHClient: Connected to {0}:{1}".format(ip, port))
+
 
     def get_transport(self):
         transport = paramiko.Transport(self._socket)

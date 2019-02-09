@@ -9,6 +9,7 @@ __author__ = 'Ahmed Nazmy <ahmed@nazmy.io>'
 
 
 import logging
+import distutils.dir_util
 import codecs
 import re
 import time
@@ -118,11 +119,11 @@ class Sniffer(object):
         # local import
         from aker import session_log_dir
         today_sessions_dir = os.path.join(
-            session_log_dir, self.session_start_date)
+            session_log_dir, self.session_start_date,self.user)
         log_file_path = os.path.join(today_sessions_dir, self.session_log)
         try:
-            os.makedirs(today_sessions_dir, 0o777)
-            os.chmod(today_sessions_dir, 0o777)
+            distutils.dir_util.mkpath(today_sessions_dir)
+            os.chmod(today_sessions_dir, 0o750)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 logging.error(

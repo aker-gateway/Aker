@@ -59,7 +59,8 @@ class Json(IdP):
                                 "Json: loading host {0} for user {1}".format(
                                     host.get("name"), self.posix_user))
                             self._allowed_ssh_hosts[host.get("name")] = {
-                                'fqdn': host.get("name"),
+                                'name': host.get("name"),
+                                'fqdn': host.get("hostname"),
                                 'ssh_port': host.get("port"),
                                 'hostgroups': host.get("hostgroups")
                             }

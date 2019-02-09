@@ -21,6 +21,7 @@ __license_info__ = {
 }
 
 import logging
+import logging.handlers
 import os
 import sys
 import uuid
@@ -117,10 +118,17 @@ class Aker(object):
         # Setup logging first thing
         for handler in logging.root.handlers[:]:
             logging.root.removeHandler(handler)
-        logging.basicConfig(
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            filename=log_file,
-            level=config.log_level)
+        
+        facility = logging.handlers.SysLogHandler.LOG_LOCAL6
+        syslog = logging.handlers.SysLogHandler(address='/dev/log',facility=facility)
+        syslog.setFormatter(logging.Formatter('Aker: %(module)s %(levelname)s - %(message)s'))
+        logging.root.addHandler(syslog)
+        logging.root.setLevel(config.log_level)
+
+        # logging.basicConfig(
+            # format='%(asctime)s - %(levelname)s - %(message)s',
+            # filename=log_file,
+            # level=config.log_level)
         logging.info(
             "Core: Starting up, user={0} from={1}:{2}".format(
                 self.posix_user,
