@@ -26,7 +26,7 @@ class HostGroup(object):
         self.hosts = []
 
     def __str__(self):
-        return "name:%s, hosts:%s" % (self.fqdn, self.ssh_port, self.hosts)
+        return "fqdn:%s, hosts:%s" % (self.fqdn, self.ssh_port, self.hosts)
 
     def __iter__(self):
         return self
@@ -47,8 +47,8 @@ class Host(object):
     hostgroups: list of hostgroups this server is part of
     """
 
-    def __init__(self, name, memberof_hostgroups, ssh_port=22):
-        self.fqdn = name
+    def __init__(self, name, fqdn, memberof_hostgroups, ssh_port=22):
+        self.fqdn = fqdn
         self.name = name
         self.ssh_port = ssh_port
         self.hostgroups = memberof_hostgroups
@@ -110,12 +110,13 @@ class Hosts(object):
                 for k, v in result.iteritems():
                     # Deserialize back from redis
                     hostentry = Host(
+                        json.loads(v)['name'],
                         json.loads(v)['fqdn'],
                         json.loads(v)['hostgroups'])
-                    self._allowed_ssh_hosts[hostentry.fqdn] = hostentry
+                    self._allowed_ssh_hosts[hostentry.name] = hostentry
                     logging.debug(
                         "Hosts: loading host {0} from cache".format(
-                            hostentry.fqdn))
+                            hostentry.name))
                     cached = True
             except Exception as e:
                 logging.error("Hosts: redis error: {0}".format(e.message))
@@ -149,12 +150,12 @@ class Hosts(object):
                 # Serialize (cache) Host objects in redis under $user:hosts
                 self.redis.hset(
                     self.hosts_cache_key,
-                    host.fqdn,
+                    host.name,
                     json.dumps(
                         vars(host)))
                 logging.debug(
                     "Hosts: adding host {0} to cache".format(
-                        host.fqdn))
+                        host.name))
                 hostentry = None
             except Exception as e:
                 logging.error(
@@ -257,17 +258,18 @@ class Hosts(object):
             # Build Host() objects out of items we got from backend
             for backend_host, backend_host_attributes in self._backend_hosts.iteritems():
                 hostentry = Host(
+                    backend_host_attributes['name'],
                     backend_host_attributes['fqdn'],
                     backend_host_attributes['hostgroups'])
-                self._allowed_ssh_hosts[hostentry.fqdn] = hostentry
+                self._allowed_ssh_hosts[hostentry.name] = hostentry
 
                 # Build HostGroup() objects from items we got from backend
                 for group in hostentry.hostgroups:
                     if group not in self._hostgroups:
                         self._hostgroups[group] = HostGroup(group)
-                        self._hostgroups[group].add_host(hostentry.fqdn)
+                        self._hostgroups[group].add_host(hostentry.name)
                     else:
-                        self._hostgroups[group].add_host(hostentry.fqdn)
+                        self._hostgroups[group].add_host(hostentry.name)
             # Save entries we got to the cache
             if self.redis is not None:
                 self._save_hosts_to_cache(self._allowed_ssh_hosts)
