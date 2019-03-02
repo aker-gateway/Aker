@@ -114,7 +114,7 @@ class IPA(IdP):
                     # TODO: Add per-host ssh port checks
                     sshport = self.default_ssh_port
                     self._allowed_ssh_hosts[host] = {
-                        'fqdn': hostname, 'ssh_port': sshport, 'hostgroups': memberof_hostgroup}
+                        'name': hostname, 'fqdn': hostname, 'ssh_port': sshport, 'hostgroups': memberof_hostgroup}
                     logging.debug("IPA: ALLOWED_HOSTS %s", host)
             except Exception as e:
                 logging.error(
