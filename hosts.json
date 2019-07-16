@@ -18,6 +18,7 @@
 			"name": "web1.ipa.example",
 			"hostname": "web1.ipa.example",
 			"port": "22",
+			"user": "root",
 			"key": "~/.ssh/id_rsa",
 			"usergroups": [
 				"lnxadmins"
@@ -30,6 +31,7 @@
 			"name": "web2.ipa.example",
 			"hostname": "web2.ipa.example",
 			"port": "22",
+			"user": "admin",
 			"key": "~/.ssh/id_rsa",
 			"usergroups": [
 				"lnxadmins"
@@ -42,6 +44,7 @@
 			"name": "db1.ipa.example",
 			"hostname": "db1.ipa.example",
 			"port": "22",
+			"user": "support",
 			"key": "~/.ssh/id_rsa",
 			"usergroups": [
 				"lnxadmins",
