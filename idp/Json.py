@@ -62,6 +62,7 @@ class Json(IdP):
                                 'name': host.get("name"),
                                 'fqdn': host.get("hostname"),
                                 'ssh_port': host.get("port"),
+                                'user': host.get("user"),
                                 'hostgroups': host.get("hostgroups")
                             }
 

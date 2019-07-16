@@ -47,9 +47,10 @@ class Host(object):
     hostgroups: list of hostgroups this server is part of
     """
 
-    def __init__(self, name, fqdn, memberof_hostgroups, ssh_port=22):
+    def __init__(self, name, fqdn, memberof_hostgroups, user="", ssh_port=22):
         self.fqdn = fqdn
         self.name = name
+        self.user = user
         self.ssh_port = ssh_port
         self.hostgroups = memberof_hostgroups
 
@@ -260,7 +261,8 @@ class Hosts(object):
                 hostentry = Host(
                     backend_host_attributes['name'],
                     backend_host_attributes['fqdn'],
-                    backend_host_attributes['hostgroups'])
+                    backend_host_attributes['hostgroups'],
+                    backend_host_attributes['user'])
                 self._allowed_ssh_hosts[hostentry.name] = hostentry
 
                 # Build HostGroup() objects from items we got from backend
