@@ -358,4 +358,6 @@ class Window(object):
 
     def restore(self):
         logging.debug("TUI restored")
-        self.loop.run()
+        self.loop.start()
+        self.loop.screen_size = None
+        self.loop.draw_screen()
