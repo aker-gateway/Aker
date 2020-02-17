@@ -354,10 +354,8 @@ class Window(object):
 
     def pause(self):
         logging.debug("TUI: tui paused")
-        self.loop.stop()
+        self.loop.screen.stop()
 
     def restore(self):
         logging.debug("TUI restored")
-        self.loop.start()
-        self.loop.screen_size = None
-        self.loop.draw_screen()
+        self.loop.screen.start()
