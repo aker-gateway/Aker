@@ -156,17 +156,13 @@ class Aker(object):
                 session_uuid, self.posix_user, host))
         try:
             session.connect(screen_size)
+            session.start_session()
         except Exception as e:
-            logging.debug("Could not connect session"+ " (" + repr(e) + ")")
+            logging.error(
+                "Core: Error during connection or starting session UUID {0} for user {1} : {2} ".format(
+                    session_uuid, self.posix_user, e.message))
             print(e)
             raw_input("Press Enter to continue...")
-            session.stop_sniffer()
-            self.tui.restore()
-            self.tui.hostlist.search.clear()  # Clear selected hosts
-            return None
-
-        try:
-            session.start_session()
         finally:
             session.stop_sniffer()
             self.tui.restore()
