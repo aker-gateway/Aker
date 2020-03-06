@@ -195,3 +195,5 @@ class SSHClient(Client):
         finally:
             logging.debug("SSHClient: interactive session ending")
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
+            sys.stdin = open('/dev/tty')
+

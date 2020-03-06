@@ -154,9 +154,15 @@ class Aker(object):
         logging.info(
             "Core: Starting session UUID {0} for user {1} to host {2}".format(
                 session_uuid, self.posix_user, host))
-        session.connect(screen_size)
         try:
+            session.connect(screen_size)
             session.start_session()
+        except Exception as e:
+            logging.error(
+                "Core: Error during connection or starting session UUID {0} for user {1} : {2} ".format(
+                    session_uuid, self.posix_user, e.message))
+            print(e)
+            raw_input("Press Enter to continue...")
         finally:
             session.stop_sniffer()
             self.tui.restore()
