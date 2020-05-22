@@ -26,7 +26,7 @@ class HostGroup(object):
         self.hosts = []
 
     def __str__(self):
-        return "fqdn:%s, hosts:%s" % (self.fqdn, self.ssh_port, self.hosts)
+        return "fqdn:%s, port:%s, hosts:%s" % (self.fqdn, self.ssh_port, self.hosts)
 
     def __iter__(self):
         return self
@@ -47,7 +47,7 @@ class Host(object):
     hostgroups: list of hostgroups this server is part of
     """
 
-    def __init__(self, name, fqdn, memberof_hostgroups, ssh_port=22):
+    def __init__(self, name, fqdn, ssh_port, memberof_hostgroups):
         self.fqdn = fqdn
         self.name = name
         self.ssh_port = ssh_port
@@ -61,7 +61,7 @@ class Host(object):
 
     def __str__(self):
         return "fqdn:%s, ssh_port:%d, hostgroups:%s" % (
-            self.fqdn, self.ssh_port, self.hostgroups)
+            self.fqdn, int(self.ssh_port), self.hostgroups)
 
     def __iter__(self):
         return self
@@ -112,6 +112,7 @@ class Hosts(object):
                     hostentry = Host(
                         json.loads(v)['name'],
                         json.loads(v)['fqdn'],
+                        json.loads(v)['ssh_port'],
                         json.loads(v)['hostgroups'])
                     self._allowed_ssh_hosts[hostentry.name] = hostentry
                     logging.debug(
@@ -224,7 +225,7 @@ class Hosts(object):
                 "Hosts: error deleting from cache : {0}".format(
                     e.message))
 
-    def list_allowed(self, from_cache=True):
+    def list_allowed(self, from_cache):
         """
         This function is the interface to the TUI
         """
@@ -237,6 +238,7 @@ class Hosts(object):
 
         # load from cache
         if from_cache:
+            logging.debug("Hosts: Trying to load from cache")
             # is redis up ?
             if self.redis is not None:
                 cached = self._load_hosts_from_cache(self.hosts_cache_key)
@@ -251,7 +253,7 @@ class Hosts(object):
 
         # No cached objects
         else:
-
+            logging.debug("Hosts: Trying to load from backend")
             # Passing the baton from the backend
             self._backend_hosts = self.idp.list_allowed()
 
@@ -260,7 +262,8 @@ class Hosts(object):
                 hostentry = Host(
                     backend_host_attributes['name'],
                     backend_host_attributes['fqdn'],
-                    backend_host_attributes['hostgroups'])
+                    backend_host_attributes['ssh_port'],
+                backend_host_attributes['hostgroups'])
                 self._allowed_ssh_hosts[hostentry.name] = hostentry
 
                 # Build HostGroup() objects from items we got from backend

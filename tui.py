@@ -328,7 +328,7 @@ class Window(object):
     def host_chosen_handler(self, choice):
         host = choice
         logging.debug("TUI: user %s chose server %s " % (self.user.name, host))
-        self.aker.init_connection(self.user.allowed_ssh_hosts[host].fqdn)
+        self.aker.init_connection(self.user.allowed_ssh_hosts[host])
 
     def update_lists(self):
         logging.info(
