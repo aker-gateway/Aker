@@ -153,7 +153,7 @@ class Aker(object):
         session.attach_sniffer(sniffer)
         logging.info(
             "Core: Starting session UUID {0} for user {1} to host {2}".format(
-                session_uuid, self.posix_user, host))
+                session_uuid, self.posix_user, host.name))
         try:
             session.connect(screen_size)
             session.start_session()
