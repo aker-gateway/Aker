@@ -79,7 +79,7 @@ class User(object):
         idp = config.get('idp')
         logging.debug("Core: using Identity Provider {0}".format(idp))
         self.hosts = Hosts(config, self.name, gateway_hostgroup, idp)
-        self.allowed_ssh_hosts, self.hostgroups = self.hosts.list_allowed()
+        self.allowed_ssh_hosts, self.hostgroups = self.hosts.list_allowed(True)
 
     def get_priv_key(self):
         try:
