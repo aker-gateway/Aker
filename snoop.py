@@ -25,7 +25,7 @@ class Sniffer(object):
 
     def __init__(self, user, src_port, host, uuid, screen_size):
         self.user = user
-        self.host = host
+        self.host = host.name
         self.uuid = uuid
         self.src_port = src_port
         self.log_file = None
@@ -36,7 +36,7 @@ class Sniffer(object):
         self.session_date_time = time.strftime("%Y/%m/%d %H:%M:%S")
         self.today = time.strftime("%Y%m%d")
         self.session_log = "{0}_{1}_{2}_{3}".format(
-            self.user, self.host.name, self.session_start_time, self.uuid)
+            self.user, self.host, self.session_start_time, self.uuid)
         self.stream = None
         self.screen = None
         self.term_cols, self.term_rows = screen_size
