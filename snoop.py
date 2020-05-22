@@ -36,7 +36,7 @@ class Sniffer(object):
         self.session_date_time = time.strftime("%Y/%m/%d %H:%M:%S")
         self.today = time.strftime("%Y%m%d")
         self.session_log = "{0}_{1}_{2}_{3}".format(
-            self.user, self.host, self.session_start_time, self.uuid)
+            self.user, self.host.name, self.session_start_time, self.uuid)
         self.stream = None
         self.screen = None
         self.term_cols, self.term_rows = screen_size
