@@ -355,7 +355,9 @@ class Window(object):
     def pause(self):
         logging.debug("TUI: tui paused")
         self.loop.screen.stop()
+        urwid.emit_signal(self.loop.screen, urwid.display_common.INPUT_DESCRIPTORS_CHANGED)
 
     def restore(self):
         logging.debug("TUI restored")
         self.loop.screen.start()
+        urwid.emit_signal(self.loop.screen, urwid.display_common.INPUT_DESCRIPTORS_CHANGED)
